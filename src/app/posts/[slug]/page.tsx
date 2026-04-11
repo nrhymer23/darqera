@@ -2,11 +2,42 @@ import { getPostBySlug } from "@/lib/posts";
 import { PILLAR_META } from "@/types/post";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 export const revalidate = 60;
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
+
+  if (!post) {
+    return { title: "Post Not Found" };
+  }
+
+  const pillar = PILLAR_META[post.pillar];
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: `https://darqera.com/posts/${post.slug}`,
+      type: "article",
+      publishedTime: post.published_at,
+      tags: post.tags,
+      section: pillar.full,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
+  };
 }
 
 export default async function PostPage({ params }: Props) {
@@ -23,7 +54,7 @@ export default async function PostPage({ params }: Props) {
   });
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Back */}
       <Link
         href={pillar.href}
@@ -46,17 +77,28 @@ export default async function PostPage({ params }: Props) {
         </span>
 
         <h1
-          className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.1] text-[#e5e2e1] mb-4"
-          style={{ letterSpacing: "-0.02em" }}
+          className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.1] mb-4"
+          style={{
+            color: "var(--text-primary)",
+            letterSpacing: "-0.02em",
+          }}
         >
           {post.title}
         </h1>
 
-        <p className="text-[#8a8a8a] text-base leading-relaxed mb-4">
+        <p
+          className="text-base leading-relaxed mb-4"
+          style={{ color: "var(--text-secondary)" }}
+        >
           {post.excerpt}
         </p>
 
-        <time className="text-[11px] text-[#8a8a8a] tracking-wide">{date}</time>
+        <time
+          className="text-[11px] tracking-wide"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {date}
+        </time>
 
         {/* Divider */}
         <div
@@ -66,9 +108,10 @@ export default async function PostPage({ params }: Props) {
       </header>
 
       {/* Body */}
-      <article className="prose prose-invert max-w-none text-[#e5e2e1] leading-relaxed">
+      <article>
         <div
-          className="whitespace-pre-wrap text-base leading-8 text-[#c8c5c4]"
+          className="whitespace-pre-wrap text-base leading-8"
+          style={{ color: "var(--text-secondary)" }}
           dangerouslySetInnerHTML={{ __html: post.body }}
         />
       </article>
@@ -79,8 +122,11 @@ export default async function PostPage({ params }: Props) {
           {post.tags.map((tag) => (
             <span
               key={tag}
-              className="text-[10px] font-semibold tracking-widest uppercase px-2 py-1 rounded-[0.125rem] text-[#8a8a8a]"
-              style={{ backgroundColor: "#1c1b1b" }}
+              className="text-[10px] font-semibold tracking-widest uppercase px-2 py-1 rounded-[0.125rem]"
+              style={{
+                color: "var(--text-muted)",
+                backgroundColor: "var(--bg-card)",
+              }}
             >
               {tag}
             </span>

@@ -1,43 +1,138 @@
 @import "tailwindcss";
 
+/* Class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
-  /* Surfaces */
-  --color-base:        #0e0e0e;
-  --color-surface:     #131313;
-  --color-surface-low: #1c1b1b;
-  --color-surface-high:#2a2a2a;
+  /* Surfaces — dark mode defaults */
+  --color-base:          #0e0e0e;
+  --color-surface:       #131313;
+  --color-surface-low:   #1c1b1b;
+  --color-surface-high:  #2a2a2a;
   --color-surface-bright:#3a3939;
 
   /* Text */
-  --color-on-surface:  #e5e2e1;
-  --color-muted:       #8a8a8a;
+  --color-on-surface:    #e5e2e1;
+  --color-muted:         #8a8a8a;
 
   /* Pillar accents */
-  --color-quantum:     #dbfcff;  /* D — Decentralized */
-  --color-ai:          #a7ffb3;  /* A — AI */
-  --color-reality:     #fff3f9;  /* R — Reality/XR */
-  --color-cyber:       #00f0ff;  /* Primary CTA / brand */
+  --color-quantum:       #dbfcff;  /* D — Decentralized */
+  --color-ai:            #a7ffb3;  /* A — AI */
+  --color-reality:       #fff3f9;  /* R — Reality/XR */
+  --color-cyber:         #00f0ff;  /* Primary CTA / brand */
 
   /* Ghost border */
-  --color-outline:     #3b494b;
+  --color-outline:       #3b494b;
 
   /* Typography */
   --font-display: var(--font-space-grotesk);
   --font-body:    var(--font-inter);
 }
 
+/* ────────────────────────────────
+   Theme Token System (CSS Variables)
+   ──────────────────────────────── */
+
 :root {
+  /* Light mode defaults */
+  --bg-primary:      #f5f3f0;
+  --bg-secondary:    #eae7e3;
+  --bg-card:         #ffffff;
+  --bg-card-hover:   #f9f8f6;
+  --bg-nav:          rgba(245, 243, 240, 0.82);
+  --bg-nav-border:   rgba(0, 0, 0, 0.06);
+
+  --text-primary:    #1a1a1a;
+  --text-secondary:  #555555;
+  --text-muted:      #888888;
+  --text-inverse:    #e5e2e1;
+
+  --border-ghost:    rgba(0, 0, 0, 0.08);
+  --signal-bar-opacity: 1;
+  --tag-bg-opacity:  0.10;
+
+  --shadow-card:     0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-nav:      0 1px 8px rgba(0, 0, 0, 0.05);
+
+  color-scheme: light;
+}
+
+.dark {
+  --bg-primary:      #131313;
+  --bg-secondary:    #0e0e0e;
+  --bg-card:         #1c1b1b;
+  --bg-card-hover:   #222222;
+  --bg-nav:          rgba(19, 19, 19, 0.75);
+  --bg-nav-border:   rgba(59, 73, 75, 0.15);
+
+  --text-primary:    #e5e2e1;
+  --text-secondary:  #b0adab;
+  --text-muted:      #8a8a8a;
+  --text-inverse:    #1a1a1a;
+
+  --border-ghost:    rgba(59, 73, 75, 0.15);
+  --signal-bar-opacity: 1;
+  --tag-bg-opacity:  0.08;
+
+  --shadow-card:     none;
+  --shadow-nav:      none;
+
   color-scheme: dark;
 }
 
+/* ────────────────────────────────
+   Base Styles
+   ──────────────────────────────── */
+
 body {
-  background-color: #131313;
-  color: #e5e2e1;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* No pure white — ever */
+/* ────────────────────────────────
+   Prose override
+   ──────────────────────────────── */
 * {
-  --tw-prose-body: #e5e2e1;
+  --tw-prose-body: var(--text-primary);
+}
+
+/* ────────────────────────────────
+   Smooth theme transitions
+   ──────────────────────────────── */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* Exclude elements where transitions cause jank */
+a, button, [role="button"] {
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform;
+  transition-duration: 0.15s;
+}
+
+/* ────────────────────────────────
+   Mobile nav animation
+   ──────────────────────────────── */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-menu-enter {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+/* ────────────────────────────────
+   Responsive utilities
+   ──────────────────────────────── */
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: clamp(2rem, 8vw, 3rem) !important;
+  }
 }

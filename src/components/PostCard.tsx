@@ -18,7 +18,9 @@ export default function PostCard({ post }: PostCardProps) {
     <Link href={`/posts/${post.slug}`} className="group block">
       <article
         className="relative flex gap-4 py-6 transition-colors"
-        style={{ borderBottom: "1px solid rgba(59,73,75,0.15)" }}
+        style={{
+          borderBottom: "1px solid var(--border-ghost)",
+        }}
       >
         {/* Signal Bar */}
         <div
@@ -39,17 +41,26 @@ export default function PostCard({ post }: PostCardProps) {
           </span>
 
           {/* Title */}
-          <h2 className="font-[family-name:var(--font-space-grotesk)] font-semibold text-[#e5e2e1] text-base leading-snug mb-2 group-hover:text-white transition-colors line-clamp-2">
+          <h2
+            className="font-[family-name:var(--font-space-grotesk)] font-semibold text-base leading-snug mb-2 group-hover:opacity-80 transition-opacity line-clamp-2"
+            style={{ color: "var(--text-primary)" }}
+          >
             {post.title}
           </h2>
 
           {/* Excerpt */}
-          <p className="text-[#8a8a8a] text-sm leading-relaxed line-clamp-2 mb-3">
+          <p
+            className="text-sm leading-relaxed line-clamp-2 mb-3"
+            style={{ color: "var(--text-muted)" }}
+          >
             {post.excerpt}
           </p>
 
           {/* Date */}
-          <time className="text-[11px] text-[#8a8a8a] tracking-wide">
+          <time
+            className="text-[11px] tracking-wide"
+            style={{ color: "var(--text-muted)" }}
+          >
             {date}
           </time>
         </div>
