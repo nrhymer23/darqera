@@ -7,6 +7,7 @@
 ## 1. What This Project Is
 
 **Site:** darqera.com
+**Live URL:** https://darqera.vercel.app
 **Repo:** github.com/nrhymer23/darqera
 **Local:** `~/projects/darqera/`
 
@@ -25,9 +26,9 @@ Content is generated via an automated signal pipeline: **X API → Claude Haiku 
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js 16 (App Router, TypeScript) |
-| Styling | Tailwind CSS v4 |
+| Styling | Tailwind CSS v4 (with `@custom-variant dark` for class-based theme toggling) |
 | Database | Supabase (PostgreSQL) |
-| Hosting | Vercel (not yet deployed — local only as of handoff) |
+| Hosting | Vercel (deployed — https://darqera.vercel.app) |
 | Fonts | Space Grotesk (headlines) + Inter (body) via next/font/google |
 
 ---
@@ -40,18 +41,19 @@ The entire visual identity is built around this system. Do not deviate from it.
 
 | Token | Hex | Usage |
 |---|---|---|
-| Background | `#131313` | Page canvas |
-| Base | `#0e0e0e` | Deepest surfaces |
-| Surface Low | `#1c1b1b` | Cards |
+| Background | `#131313` | Page canvas (dark) / `#f5f3f0` (light) |
+| Base | `#0e0e0e` | Deepest surfaces (dark) / `#eae7e3` (light) |
+| Surface Low | `#1c1b1b` | Cards (dark) / `#ffffff` (light) |
 | Surface High | `#2a2a2a` | Interactive containers |
 | Surface Bright | `#3a3939` | Focus elements |
-| On Surface (text) | `#e5e2e1` | All body text — never use #fff |
-| Muted | `#8a8a8a` | Secondary text, dates, labels |
+| On Surface (text) | `#e5e2e1` (dark) / `#1a1a1a` (light) | All body text — never use #fff |
+| Muted | `#8a8a8a` (dark) / `#888888` (light) | Secondary text, dates, labels |
+| Secondary text | `#b0adab` (dark) / `#555555` (light) | Hero subtext, descriptions |
 | Cyber Teal (brand) | `#00f0ff` | Logo, CTA, Home tab active |
 | AI accent | `#a7ffb3` | Pillar A — Artificial Intelligence |
 | Quantum accent | `#dbfcff` | Pillar D — Decentralized |
 | Reality accent | `#fff3f9` | Pillar R — Reality/XR |
-| Ghost border | `#3b494b` at 15% opacity | Subtle dividers only |
+| Ghost border | `rgba(59,73,75,0.15)` dark / `rgba(0,0,0,0.08)` light | Subtle dividers only |
 
 ### Typography
 - **Headlines/Display:** Space Grotesk, font-bold, letter-spacing `-0.02em`
@@ -61,29 +63,60 @@ The entire visual identity is built around this system. Do not deviate from it.
 
 ### Rules
 - **No 1px borders** — use background color shifts to separate sections
-- **No pure white (#fff)** — always use `#e5e2e1` for text
+- **No pure white (#fff)** — always use theme-aware CSS variables
 - **No heavy rounding** — keep edges sharp (`rounded-[0.125rem]` or none)
 - **Signal Bar** — every post card has a 2px vertical left-border in its pillar accent color
-- **Glassmorphism nav** — `rgba(19,19,19,0.75)` background + `blur(32px)` backdrop filter
+- **Glassmorphism nav** — backdrop-filter blur(32px) with theme-aware background
+- **Use CSS variables** — all colors should reference `var(--text-primary)`, `var(--bg-card)`, etc. Never hardcode theme colors in components
 
 ---
 
-## 4. File Structure
+## 4. Theme System (Light / Dark / System)
+
+The site supports three theme modes managed by a React context:
+
+- **`globals.css`** — Defines `:root` (light) and `.dark` (dark) CSS custom property sets using `@custom-variant dark (&:where(.dark, .dark *))` for Tailwind v4
+- **`ThemeProvider.tsx`** — React context that manages theme state, persists to `localStorage` key `darqera-theme`, listens for system `prefers-color-scheme` changes, and applies/removes `.dark` class on `<html>`
+- **`ThemeToggle.tsx`** — Dropdown component with Sun/Moon/Monitor icons positioned in the navbar
+- **Flash prevention** — Inline `<script>` in `layout.tsx` reads localStorage before React hydration to prevent FOUC
+
+### CSS Variable Tokens
+
+| Variable | Purpose |
+|---|---|
+| `--bg-primary` | Page background |
+| `--bg-secondary` | Deep surfaces |
+| `--bg-card` | Card backgrounds |
+| `--bg-card-hover` | Card hover state |
+| `--bg-nav` | Nav background (with alpha) |
+| `--bg-nav-border` | Nav bottom border |
+| `--text-primary` | Main text |
+| `--text-secondary` | Subtext, descriptions |
+| `--text-muted` | Dates, labels |
+| `--border-ghost` | Dividers |
+| `--shadow-card` | Card elevation |
+| `--shadow-nav` | Nav shadow |
+
+---
+
+## 5. File Structure
 
 ```
 src/
 ├── app/
-│   ├── globals.css          ← Design tokens, base styles
-│   ├── layout.tsx           ← Root layout, font loading, Nav
+│   ├── globals.css          ← Design tokens, theme variables, base styles
+│   ├── layout.tsx           ← Root layout, ThemeProvider, Nav, footer, SEO metadata
 │   ├── page.tsx             ← Homepage / signal feed
-│   ├── a/page.tsx           ← AI pillar page
-│   ├── d/page.tsx           ← Decentralized pillar page
-│   ├── r/page.tsx           ← Reality pillar page
-│   ├── q/page.tsx           ← Quantum pillar page
-│   └── posts/[slug]/page.tsx ← Individual post view
+│   ├── a/page.tsx           ← AI pillar page (with SEO metadata)
+│   ├── d/page.tsx           ← Decentralized pillar page (with SEO metadata)
+│   ├── r/page.tsx           ← Reality pillar page (with SEO metadata)
+│   ├── q/page.tsx           ← Quantum pillar page (with SEO metadata)
+│   └── posts/[slug]/page.tsx ← Individual post view (with dynamic generateMetadata)
 ├── components/
-│   ├── Nav.tsx              ← Sticky glassmorphism nav, 5-tab structure
-│   └── PostCard.tsx         ← Post card with Signal Bar accent
+│   ├── Nav.tsx              ← Sticky glassmorphism nav, 5-tab desktop + mobile hamburger
+│   ├── PostCard.tsx         ← Post card with Signal Bar accent
+│   ├── ThemeProvider.tsx    ← Light/Dark/System theme context
+│   └── ThemeToggle.tsx      ← Theme dropdown toggle (Sun/Moon/Monitor)
 ├── lib/
 │   ├── supabase.ts          ← Supabase client (null-safe if env vars missing)
 │   └── posts.ts             ← getPosts(pillar?) and getPostBySlug(slug)
@@ -93,7 +126,7 @@ src/
 
 ---
 
-## 5. Supabase Schema
+## 6. Supabase Schema
 
 **Table: `posts`**
 
@@ -128,7 +161,7 @@ values (
 
 ---
 
-## 6. Environment Variables
+## 7. Environment Variables
 
 File: `~/projects/darqera/.env.local` (gitignored, not in repo)
 
@@ -137,9 +170,11 @@ NEXT_PUBLIC_SUPABASE_URL=https://sadvsbduqnjywkgkevnq.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_1bK5nu7QNigRMT6-w7fr1A_Slb04cNp
 ```
 
+These same env vars are configured in the Vercel project dashboard.
+
 ---
 
-## 7. Navigation Structure
+## 8. Navigation Structure
 
 5-tab nav, strictly enforced:
 
@@ -153,32 +188,42 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_1bK5nu7QNigRMT6-w7fr1A_Slb04cNp
 
 Active tab shows a 2px underline in its accent color.
 
----
-
-## 8. What's Working (as of 2026-04-11)
-
-- Build passes clean (`npm run build`)
-- Homepage renders with hero section and signal feed
-- Post cards render with Signal Bar, pillar tag, title, excerpt, date
-- All 4 pillar pages load and filter by pillar from Supabase
-- Post detail page (`/posts/[slug]`) renders full post
-- Supabase connection confirmed live — test post ("Hello World") renders on homepage
-- Glassmorphism nav with active tab underline indicator
+**Mobile:** Nav collapses to hamburger menu below 640px. Mobile menu slides down with pillar links + full titles. Each active item has a left accent border.
 
 ---
 
-## 9. Known CSS Issues (needs fixing)
+## 9. SEO Metadata
 
-These were visible in the last screenshot and need attention:
+SEO is implemented at every level:
 
-- **Hero subtext** (`Signal-driven coverage of...`) is barely visible — color contrast too low against the background
-- **Nav tab spacing** — "A" tab appears visually close to others, may need spacing tweak
-- **Post card bottom border** — the ghost divider between cards may not be rendering consistently
-- **Mobile layout** — not yet tested or verified
+- **Root layout:** Title template (`%s | DARQ Era`), default description, OpenGraph, Twitter card, robots directives, `metadataBase` set to `https://darqera.com`
+- **Pillar pages (D, A, R, Q):** Individual `title`, `description`, OG with per-pillar URLs
+- **Post detail:** Dynamic `generateMetadata()` generates title, description, OG article type with `publishedTime`, `tags`, and `section`
 
 ---
 
-## 10. Content Voice & Post Structure
+## 10. What's Working (as of 2026-04-11)
+
+- ✅ Build passes clean (`npm run build`) — zero TypeScript/ESLint errors
+- ✅ **Deployed to Vercel** at https://darqera.vercel.app
+- ✅ Homepage renders with hero section and signal feed
+- ✅ Post cards render with Signal Bar, pillar tag, title, excerpt, date
+- ✅ All 4 pillar pages load and filter by pillar from Supabase
+- ✅ Post detail page (`/posts/[slug]`) renders full post with back nav
+- ✅ Supabase connection confirmed live — test post ("Hello World") renders on homepage
+- ✅ Glassmorphism nav with active tab underline indicator
+- ✅ **Light/Dark/System theme toggle** — persists to localStorage, prevents FOUC
+- ✅ **Hero subtext contrast** — fixed (uses `var(--text-secondary)`)
+- ✅ **Nav tab spacing** — fixed (gap-2)
+- ✅ **Ghost dividers** — fixed (uses `var(--border-ghost)`)
+- ✅ **Mobile responsive layout** — hamburger nav, responsive padding, fluid typography
+- ✅ **Per-page SEO metadata** — all pillar pages + dynamic post metadata
+- ✅ **Footer** with copyright line
+- ✅ ISR configured — 60s revalidation on all pages (Vercel-ready)
+
+---
+
+## 11. Content Voice & Post Structure
 
 Every post should follow this structure:
 1. **Hook** (1–3 lines)
@@ -193,7 +238,7 @@ Every post should follow this structure:
 
 ---
 
-## 11. Running Locally
+## 12. Running Locally
 
 ```bash
 cd ~/projects/darqera
@@ -202,22 +247,22 @@ npm run dev
 # → http://localhost:3000
 ```
 
-Make sure `.env.local` has the Supabase credentials (see Section 6).
+Make sure `.env.local` has the Supabase credentials (see Section 7).
 
 ---
 
-## 12. Next Steps (priority order)
+## 13. Next Steps (priority order)
 
-1. **Fix CSS issues** listed in Section 9
-2. **Deploy to Vercel** — connect the GitHub repo (github.com/nrhymer23/darqera), add env vars in Vercel dashboard, point darqera.com DNS
-3. **Mobile layout QA** — verify all pages on mobile viewport
-4. **Push first real content** — replace the "Hello World" test post with Day 1 of the 30-day content plan
-5. **SEO metadata** — add per-page OG tags and dynamic metadata for post pages
-6. **ISR / revalidation** — currently set to `revalidate = 60` on all pages; verify this works on Vercel
+1. **Push first real content** — replace the "Hello World" test post with Day 1 of the 30-day content plan
+2. **Custom domain** — point `darqera.com` DNS to Vercel (Project Settings → Domains)
+3. **OG image generation** — consider adding dynamic OG images using `next/og`
+4. **RSS feed** — add `/feed.xml` route for subscribers
+5. **Analytics** — integrate Vercel Analytics or Plausible
+6. **Search functionality** — add a search bar to filter across all pillars
 
 ---
 
-## 13. Design Prototype Reference
+## 14. Design Prototype Reference
 
 The original design was built in Google Stitch. Key screens:
 - **Home Dashboard** — dark layout, hero + signal feed cards
