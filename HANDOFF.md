@@ -202,7 +202,7 @@ SEO is implemented at every level:
 
 ---
 
-## 10. What's Working (as of 2026-04-11)
+## 10. What's Working (as of 2026-04-14)
 
 - ✅ Build passes clean (`npm run build`) — zero TypeScript/ESLint errors
 - ✅ **Deployed to Vercel** at https://darqera.vercel.app
@@ -220,6 +220,18 @@ SEO is implemented at every level:
 - ✅ **Per-page SEO metadata** — all pillar pages + dynamic post metadata
 - ✅ **Footer** with copyright line
 - ✅ ISR configured — 60s revalidation on all pages (Vercel-ready)
+- ✅ **Admin page** (`/admin`) — auth gate, create post form, post list, delete with confirm
+- ✅ **Admin API** (`/api/admin/posts`) — GET/POST/DELETE, service role key auth
+- ✅ **View counter** — `ViewCounter.tsx` + `/api/views` route, session dedup + IP rate limiting
+- ✅ **Newsletter capture** — `NewsletterCapture.tsx`, writes to `subscribers` Supabase table
+- ✅ **Related posts** — `RelatedPosts.tsx`, same pillar filtered, excludes current post
+- ✅ **Reading time** — `readingTime.ts`, 238 WPM calculation
+- ✅ All above components wired into post detail page (`/posts/[slug]`)
+
+### ⚠️ Built but not yet verified in Supabase/Vercel
+- `view_count` column must be added to `posts` table
+- `subscribers` table must be created
+- `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_SECRET_KEY` must be set in Vercel env vars
 
 ---
 
@@ -253,12 +265,68 @@ Make sure `.env.local` has the Supabase credentials (see Section 7).
 
 ## 13. Next Steps (priority order)
 
-1. **Push first real content** — replace the "Hello World" test post with Day 1 of the 30-day content plan
-2. **Custom domain** — point `darqera.com` DNS to Vercel (Project Settings → Domains)
-3. **OG image generation** — consider adding dynamic OG images using `next/og`
-4. **RSS feed** — add `/feed.xml` route for subscribers
-5. **Analytics** — integrate Vercel Analytics or Plausible
-6. **Search functionality** — add a search bar to filter across all pillars
+1. **Custom domain** — point `darqera.com` DNS to Vercel (Project Settings → Domains)
+2. **Push first real content** — replace the "Hello World" test post with Day 1 of the 30-day content plan
+
+---
+
+## 14. Feature Backlog
+
+### Content & Pipeline
+- [ ] Auto-post from signal pipeline — content hits Supabase, triggers a draft post automatically
+- [ ] NotebookLM summaries embedded in posts — surface pipeline output on the page
+- [ ] Tag/category filtering by DARQ pillars (D/A/R/Q)
+
+### Reader Experience
+- [ ] Newsletter/email capture — Supabase table, no third-party needed
+- [ ] Reading time estimate on posts
+- [ ] Related posts section at bottom of each post
+
+### Social & Growth
+- [ ] Auto-share to X when a post publishes
+- [ ] Open Graph images per post — dynamic via `next/og` (critical for link previews)
+- [ ] View/read count per post (Supabase increment)
+
+### Admin Page
+- [ ] Manual post submission and deletion
+- [ ] Metrics dashboard — readers, shares, etc.
+
+### Personal Brand (TBD — not urgent)
+- [ ] About page
+- [ ] Now page (current projects, SRE internship, etc.)
+
+---
+
+## 15. Tag Taxonomy (TBD)
+
+Tags extend beyond the 4 DARQ pillars for discoverability and SEO. Final list TBD — placeholders below.
+
+### Confirmed Pillars (already in schema)
+- `decentralization` / `D`
+- `ai` / `A`
+- `reality` / `R`
+- `quantum` / `Q`
+
+### Candidate Tags (to be confirmed)
+> These are popular keyword categories — finalize before first content push.
+
+**AI & Tech**
+- `llm`, `machine-learning`, `automation`, `agents`, `open-source`, `infrastructure`
+
+**Decentralization**
+- `blockchain`, `defi`, `dao`, `crypto`, `web3`, `protocols`
+
+**Reality / XR**
+- `ar`, `vr`, `spatial-computing`, `metaverse`, `wearables`
+
+**Quantum**
+- `cryptography`, `post-quantum`, `quantum-hardware`, `error-correction`
+
+**Culture & Creator**
+- `creator-economy`, `internet-culture`, `social-media`, `digital-identity`
+
+**General**
+- `breaking`, `analysis`, `deep-dive`, `weekly-signal`
 
 ---
 

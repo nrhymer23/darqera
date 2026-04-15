@@ -10,6 +10,7 @@ export interface Post {
   published_at: string;
   status: "draft" | "published";
   tags: string[];
+  view_count?: number;
 }
 
 export const PILLAR_META: Record<

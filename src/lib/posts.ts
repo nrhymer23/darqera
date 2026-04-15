@@ -32,3 +32,23 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   if (error) return null;
   return data as Post;
 }
+
+export async function getRelatedPosts(
+  pillar: Pillar,
+  excludeSlug: string,
+  limit: number = 3
+): Promise<Post[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("status", "published")
+    .eq("pillar", pillar)
+    .neq("slug", excludeSlug)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if (error) return [];
+  return data as Post[];
+}

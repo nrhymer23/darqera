@@ -1,8 +1,12 @@
 import { getPostBySlug } from "@/lib/posts";
 import { PILLAR_META } from "@/types/post";
+import { getReadingTime } from "@/lib/readingTime";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import RelatedPosts from "@/components/RelatedPosts";
+import NewsletterCapture from "@/components/NewsletterCapture";
+import ViewCounter from "@/components/ViewCounter";
 
 export const revalidate = 60;
 
@@ -52,6 +56,7 @@ export default async function PostPage({ params }: Props) {
     day: "numeric",
     year: "numeric",
   });
+  const readMin = getReadingTime(post.body);
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -93,12 +98,17 @@ export default async function PostPage({ params }: Props) {
           {post.excerpt}
         </p>
 
-        <time
-          className="text-[11px] tracking-wide"
+        {/* Date + Reading time + Views */}
+        <div
+          className="flex items-center gap-2 text-[11px] tracking-wide"
           style={{ color: "var(--text-muted)" }}
         >
-          {date}
-        </time>
+          <time>{date}</time>
+          <span>·</span>
+          <span>{readMin} min read</span>
+          <span>·</span>
+          <ViewCounter slug={slug} initialCount={post.view_count ?? 0} />
+        </div>
 
         {/* Divider */}
         <div
@@ -133,6 +143,12 @@ export default async function PostPage({ params }: Props) {
           ))}
         </div>
       )}
+
+      {/* Related Posts */}
+      <RelatedPosts currentSlug={slug} pillar={post.pillar} />
+
+      {/* Newsletter */}
+      <NewsletterCapture />
     </div>
   );
 }

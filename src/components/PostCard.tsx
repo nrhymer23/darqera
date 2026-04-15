@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Post } from "@/types/post";
 import { PILLAR_META } from "@/types/post";
+import { getReadingTime } from "@/lib/readingTime";
 
 interface PostCardProps {
   post: Post;
@@ -13,6 +14,7 @@ export default function PostCard({ post }: PostCardProps) {
     day: "numeric",
     year: "numeric",
   });
+  const readMin = getReadingTime(post.body);
 
   return (
     <Link href={`/posts/${post.slug}`} className="group block">
@@ -56,13 +58,36 @@ export default function PostCard({ post }: PostCardProps) {
             {post.excerpt}
           </p>
 
-          {/* Date */}
-          <time
-            className="text-[11px] tracking-wide"
+          {/* Date + Reading time + Views */}
+          <div
+            className="flex items-center gap-2 text-[11px] tracking-wide"
             style={{ color: "var(--text-muted)" }}
           >
-            {date}
-          </time>
+            <time>{date}</time>
+            <span>·</span>
+            <span>{readMin} min read</span>
+            {post.view_count != null && post.view_count > 0 && (
+              <>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  {post.view_count.toLocaleString()}
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </article>
     </Link>

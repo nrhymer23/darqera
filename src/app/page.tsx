@@ -1,5 +1,6 @@
 import { getPosts } from "@/lib/posts";
 import PostCard from "@/components/PostCard";
+import NewsletterCapture from "@/components/NewsletterCapture";
 
 export const revalidate = 60;
 
@@ -50,6 +51,9 @@ export default async function HomePage() {
           ))}
         </div>
       )}
+
+      {/* Newsletter */}
+      <NewsletterCapture />
     </div>
   );
 }
