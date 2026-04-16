@@ -130,16 +130,17 @@ export default async function PostPage({ params }: Props) {
       {post.tags?.length > 0 && (
         <div className="mt-12 flex flex-wrap gap-2">
           {post.tags.map((tag) => (
-            <span
+            <Link
               key={tag}
-              className="text-[10px] font-semibold tracking-widest uppercase px-2 py-1 rounded-[0.125rem]"
+              href={`/tags/${encodeURIComponent(tag)}`}
+              className="text-[10px] font-semibold tracking-widest uppercase px-2 py-1 rounded-[0.125rem] transition-opacity hover:opacity-70"
               style={{
                 color: "var(--text-muted)",
                 backgroundColor: "var(--bg-card)",
               }}
             >
-              {tag}
-            </span>
+              #{tag}
+            </Link>
           ))}
         </div>
       )}

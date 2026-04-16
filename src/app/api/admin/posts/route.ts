@@ -1,5 +1,6 @@
 import { type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { postTweet } from "@/lib/twitter";
 
 function unauthorized() {
   return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -70,6 +71,14 @@ export async function POST(request: NextRequest) {
 
   if (error)
     return Response.json({ error: error.message }, { status: 500 });
+
+  // Auto-share to Twitter if published
+  if (data.status === "published") {
+    // Fire and forget
+    postTweet(data.title, data.slug, data.excerpt).catch(err => {
+      console.error("Async tweet error:", err);
+    });
+  }
 
   return Response.json({ post: data }, { status: 201 });
 }

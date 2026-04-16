@@ -52,3 +52,18 @@ export async function getRelatedPosts(
   if (error) return [];
   return data as Post[];
 }
+
+export async function getPostsByTag(tag: string): Promise<Post[]> {
+  if (!supabase) return [];
+
+  // Use the contains operator for Postgres arrays (represented by cs in postgrest)
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("status", "published")
+    .contains("tags", [tag])
+    .order("published_at", { ascending: false });
+
+  if (error) throw error;
+  return data as Post[];
+}

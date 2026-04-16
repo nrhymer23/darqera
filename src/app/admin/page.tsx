@@ -4,7 +4,14 @@ import { useState, useEffect, type FormEvent } from "react";
 import type { Post, Pillar } from "@/types/post";
 import { PILLAR_META } from "@/types/post";
 
-type Tab = "posts" | "create";
+type Tab = "posts" | "create" | "metrics";
+
+interface Metrics {
+  publishedPosts: number;
+  draftPosts: number;
+  totalViews: number;
+  subscribers: number;
+}
 
 export default function AdminPage() {
   const [adminKey, setAdminKey] = useState("");
@@ -13,6 +20,7 @@ export default function AdminPage() {
 
   const [tab, setTab] = useState<Tab>("posts");
   const [posts, setPosts] = useState<Post[]>([]);
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -40,7 +48,10 @@ export default function AdminPage() {
 
   // Fetch posts when authenticated
   useEffect(() => {
-    if (authenticated) fetchPosts();
+    if (authenticated) {
+      fetchPosts();
+      fetchMetrics();
+    }
   }, [authenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const headers = () => ({
@@ -65,6 +76,18 @@ export default function AdminPage() {
       setError("Failed to fetch posts.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchMetrics() {
+    try {
+      const res = await fetch("/api/admin/metrics", { headers: headers() });
+      if (res.ok) {
+        const data = await res.json();
+        setMetrics(data.metrics);
+      }
+    } catch {
+      console.error("Failed to fetch metrics");
     }
   }
 
@@ -252,7 +275,7 @@ export default function AdminPage() {
         className="flex gap-1 mb-8 p-1 rounded-[0.125rem]"
         style={{ backgroundColor: "var(--bg-secondary)" }}
       >
-        {(["posts", "create"] as Tab[]).map((t) => (
+        {(["posts", "create", "metrics"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => {
@@ -269,7 +292,7 @@ export default function AdminPage() {
                 tab === t ? "var(--text-primary)" : "var(--text-muted)",
             }}
           >
-            {t === "posts" ? "All Posts" : "Create Post"}
+            {t === "posts" ? "All Posts" : t === "create" ? "Create Post" : "Metrics"}
           </button>
         ))}
       </div>
@@ -297,6 +320,28 @@ export default function AdminPage() {
           }}
         >
           {success}
+        </div>
+      )}
+
+      {/* ──── Metrics Dashboard ──── */}
+      {tab === "metrics" && metrics && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="p-4 rounded-[0.125rem]" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-ghost)" }}>
+            <p className="text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>Published Posts</p>
+            <p className="text-3xl font-[family-name:var(--font-space-grotesk)]" style={{ color: "var(--text-primary)" }}>{metrics.publishedPosts}</p>
+          </div>
+          <div className="p-4 rounded-[0.125rem]" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-ghost)" }}>
+            <p className="text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>Drafts</p>
+            <p className="text-3xl font-[family-name:var(--font-space-grotesk)]" style={{ color: "var(--text-primary)" }}>{metrics.draftPosts}</p>
+          </div>
+          <div className="p-4 rounded-[0.125rem]" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-ghost)" }}>
+            <p className="text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>Total Views</p>
+            <p className="text-3xl font-[family-name:var(--font-space-grotesk)]" style={{ color: "var(--text-primary)" }}>{metrics.totalViews.toLocaleString()}</p>
+          </div>
+          <div className="p-4 rounded-[0.125rem]" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-ghost)" }}>
+            <p className="text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>Subscribers</p>
+            <p className="text-3xl font-[family-name:var(--font-space-grotesk)]" style={{ color: "#00f0ff" }}>{metrics.subscribers}</p>
+          </div>
         </div>
       )}
 

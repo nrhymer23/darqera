@@ -107,19 +107,30 @@ src/
 │   ├── globals.css          ← Design tokens, theme variables, base styles
 │   ├── layout.tsx           ← Root layout, ThemeProvider, Nav, footer, SEO metadata
 │   ├── page.tsx             ← Homepage / signal feed
+│   ├── admin/page.tsx       ← Post management dashboard (requires auth)
+│   ├── api/                 ← API routes
+│   │   ├── admin/posts/route.ts ← CRUD operations for posts using service role
+│   │   └── views/route.ts   ← IP-based view counter increment logic
 │   ├── a/page.tsx           ← AI pillar page (with SEO metadata)
 │   ├── d/page.tsx           ← Decentralized pillar page (with SEO metadata)
 │   ├── r/page.tsx           ← Reality pillar page (with SEO metadata)
 │   ├── q/page.tsx           ← Quantum pillar page (with SEO metadata)
-│   └── posts/[slug]/page.tsx ← Individual post view (with dynamic generateMetadata)
+│   └── posts/[slug]/
+│       ├── page.tsx         ← Individual post view (with dynamic generateMetadata)
+│       └── opengraph-image.tsx ← Dynamic OG image generator
 ├── components/
 │   ├── Nav.tsx              ← Sticky glassmorphism nav, 5-tab desktop + mobile hamburger
 │   ├── PostCard.tsx         ← Post card with Signal Bar accent
 │   ├── ThemeProvider.tsx    ← Light/Dark/System theme context
-│   └── ThemeToggle.tsx      ← Theme dropdown toggle (Sun/Moon/Monitor)
+│   ├── ThemeToggle.tsx      ← Theme dropdown toggle (Sun/Moon/Monitor)
+│   ├── ViewCounter.tsx      ← View count display and increment component
+│   ├── NewsletterCapture.tsx← Email capture form
+│   └── RelatedPosts.tsx     ← Displays 3 recent posts from the same pillar
 ├── lib/
 │   ├── supabase.ts          ← Supabase client (null-safe if env vars missing)
-│   └── posts.ts             ← getPosts(pillar?) and getPostBySlug(slug)
+│   ├── supabaseAdmin.ts     ← Supabase client with service role key for admin operations
+│   ├── posts.ts             ← getPosts(pillar?) and getPostBySlug(slug)
+│   └── readingTime.ts       ← Helper for calculating WPM-based read time
 └── types/
     └── post.ts              ← Post type, Pillar type, PILLAR_META config
 ```
@@ -275,20 +286,20 @@ Make sure `.env.local` has the Supabase credentials (see Section 7).
 ### Content & Pipeline
 - [ ] Auto-post from signal pipeline — content hits Supabase, triggers a draft post automatically
 - [ ] NotebookLM summaries embedded in posts — surface pipeline output on the page
-- [ ] Tag/category filtering by DARQ pillars (D/A/R/Q)
+- [x] Tag/category filtering by DARQ pillars (D/A/R/Q)
 
 ### Reader Experience
-- [ ] Newsletter/email capture — Supabase table, no third-party needed
-- [ ] Reading time estimate on posts
-- [ ] Related posts section at bottom of each post
+- [x] Newsletter/email capture — Supabase table, no third-party needed
+- [x] Reading time estimate on posts
+- [x] Related posts section at bottom of each post
 
 ### Social & Growth
 - [ ] Auto-share to X when a post publishes
-- [ ] Open Graph images per post — dynamic via `next/og` (critical for link previews)
-- [ ] View/read count per post (Supabase increment)
+- [x] Open Graph images per post — dynamic via `next/og` (critical for link previews)
+- [x] View/read count per post (Supabase increment)
 
 ### Admin Page
-- [ ] Manual post submission and deletion
+- [x] Manual post submission and deletion
 - [ ] Metrics dashboard — readers, shares, etc.
 
 ### Personal Brand (TBD — not urgent)
