@@ -110,11 +110,14 @@ src/
 │   ├── admin/page.tsx       ← Post management dashboard (requires auth)
 │   ├── api/                 ← API routes
 │   │   ├── admin/posts/route.ts ← CRUD operations for posts using service role
+│   │   ├── admin/metrics/route.ts ← Admin top-level dashboard metrics
+│   │   ├── webhooks/signal/route.ts ← Automated webhook for external Signal pipeline
 │   │   └── views/route.ts   ← IP-based view counter increment logic
 │   ├── a/page.tsx           ← AI pillar page (with SEO metadata)
 │   ├── d/page.tsx           ← Decentralized pillar page (with SEO metadata)
 │   ├── r/page.tsx           ← Reality pillar page (with SEO metadata)
 │   ├── q/page.tsx           ← Quantum pillar page (with SEO metadata)
+│   ├── tags/[tag]/page.tsx  ← Tag index to view posts filtered by a given tag
 │   └── posts/[slug]/
 │       ├── page.tsx         ← Individual post view (with dynamic generateMetadata)
 │       └── opengraph-image.tsx ← Dynamic OG image generator
@@ -129,7 +132,7 @@ src/
 ├── lib/
 │   ├── supabase.ts          ← Supabase client (null-safe if env vars missing)
 │   ├── supabaseAdmin.ts     ← Supabase client with service role key for admin operations
-│   ├── posts.ts             ← getPosts(pillar?) and getPostBySlug(slug)
+│   ├── posts.ts             ← getPosts, getPostBySlug, getRelatedPosts, getPostsByTag
 │   └── readingTime.ts       ← Helper for calculating WPM-based read time
 └── types/
     └── post.ts              ← Post type, Pillar type, PILLAR_META config
@@ -237,14 +240,12 @@ SEO is implemented at every level:
 - ✅ **Newsletter capture** — `NewsletterCapture.tsx`, writes to `subscribers` Supabase table
 - ✅ **Related posts** — `RelatedPosts.tsx`, same pillar filtered, excludes current post
 - ✅ **Reading time** — `readingTime.ts`, 238 WPM calculation
+- ✅ **Tag Index Pages** — `/tags/[tag]` fetching posts via Postgres Array contains logic
+- ✅ **Admin Metrics** — Metrics tab on the dashboard, aggregates published vs draft + total views + subscriber counts
+- ✅ **Signal Webhook** — `/api/webhooks/signal` parsing NotebookLM data automatically into drafted posts
 - ✅ All above components wired into post detail page (`/posts/[slug]`)
 
-### ⚠️ Built but not yet verified in Supabase/Vercel
-- `view_count` column must be added to `posts` table
-- `subscribers` table must be created
-- `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_SECRET_KEY` must be set in Vercel env vars
 
----
 
 ## 11. Content Voice & Post Structure
 
@@ -284,8 +285,8 @@ Make sure `.env.local` has the Supabase credentials (see Section 7).
 ## 14. Feature Backlog
 
 ### Content & Pipeline
-- [ ] Auto-post from signal pipeline — content hits Supabase, triggers a draft post automatically
-- [ ] NotebookLM summaries embedded in posts — surface pipeline output on the page
+- [x] Auto-post from signal pipeline — content hits Supabase, triggers a draft post automatically
+- [x] NotebookLM summaries embedded in posts — surface pipeline output on the page
 - [x] Tag/category filtering by DARQ pillars (D/A/R/Q)
 
 ### Reader Experience
@@ -300,7 +301,7 @@ Make sure `.env.local` has the Supabase credentials (see Section 7).
 
 ### Admin Page
 - [x] Manual post submission and deletion
-- [ ] Metrics dashboard — readers, shares, etc.
+- [x] Metrics dashboard — readers, shares, etc.
 
 ### Personal Brand (TBD — not urgent)
 - [ ] About page
