@@ -216,7 +216,7 @@ SEO is implemented at every level:
 
 ---
 
-## 10. What's Working (as of 2026-04-14)
+## 10. What's Working (as of 2026-04-15)
 
 - ✅ Build passes clean (`npm run build`) — zero TypeScript/ESLint errors
 - ✅ **Deployed to Vercel** at https://darqera.vercel.app
@@ -243,6 +243,7 @@ SEO is implemented at every level:
 - ✅ **Tag Index Pages** — `/tags/[tag]` fetching posts via Postgres Array contains logic
 - ✅ **Admin Metrics** — Metrics tab on the dashboard, aggregates published vs draft + total views + subscriber counts
 - ✅ **Signal Webhook** — `/api/webhooks/signal` parsing NotebookLM data automatically into drafted posts
+- ✅ **Local Environment** — `.env.local` keys (Admin, Supabase) successfully authenticated on the local dev server
 - ✅ All above components wired into post detail page (`/posts/[slug]`)
 
 
