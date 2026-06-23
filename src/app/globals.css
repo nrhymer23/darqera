@@ -54,6 +54,17 @@
   --shadow-card:     0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
   --shadow-nav:      0 1px 8px rgba(0, 0, 0, 0.05);
 
+  /* Pillar accents — light-mode variants (>=4.5:1 on light surfaces) */
+  --pillar-d: #00897b;
+  --pillar-a: #1f9d57;
+  --pillar-r: #c81e63;
+  --pillar-q: #7c3aed;
+  --brand-cyan: #0a8aa0;
+  /* Atmosphere — light = soft neutral wash (no violet) */
+  --atmos-1: #f5f3f0;
+  --atmos-2: #efece7;
+  --atmos-3: #f5f3f0;
+
   color-scheme: light;
 }
 
@@ -76,6 +87,17 @@
 
   --shadow-card:     none;
   --shadow-nav:      none;
+
+  /* Pillar accents — re-saturated dark-mode set */
+  --pillar-d: #00e5c4;
+  --pillar-a: #39ff8c;
+  --pillar-r: #ff3d8a;
+  --pillar-q: #b366ff;
+  --brand-cyan: #00f0ff;
+  /* Atmosphere — deep indigo-violet */
+  --atmos-1: #0e0e0e;
+  --atmos-2: #12101f;
+  --atmos-3: #18142b;
 
   color-scheme: dark;
 }
@@ -135,4 +157,35 @@ a, button, [role="button"] {
   .hero-title {
     font-size: clamp(2rem, 8vw, 3rem) !important;
   }
+}
+
+/* ────────────────────────────────
+   Atmospheric gradient field (hero / section tops)
+   ──────────────────────────────── */
+.atmos-field {
+  background: linear-gradient(135deg, var(--atmos-1), var(--atmos-2), var(--atmos-3), var(--atmos-2), var(--atmos-1));
+  background-size: 300% 300%;
+  animation: atmos-drift 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.atmos-field:hover,
+.atmos-field:focus-within {
+  animation-play-state: paused;
+}
+@keyframes atmos-drift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ────────────────────────────────
+   Focus ring (brand cyan)
+   ──────────────────────────────── */
+:where(a, button, [role="button"], input, select, textarea):focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmos-field { animation: none; }
 }
