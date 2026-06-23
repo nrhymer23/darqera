@@ -7,6 +7,9 @@ import type { Metadata } from "next";
 import RelatedPosts from "@/components/RelatedPosts";
 import NewsletterCapture from "@/components/NewsletterCapture";
 import ViewCounter from "@/components/ViewCounter";
+import SignalStrength from "@/components/SignalStrength";
+import { DEFAULT_SIGNAL } from "@/lib/signal";
+import { wrapWhyItMatters } from "@/lib/postBody";
 
 export const revalidate = 60;
 
@@ -51,6 +54,7 @@ export default async function PostPage({ params }: Props) {
   if (!post) notFound();
 
   const pillar = PILLAR_META[post.pillar];
+  const pillarVar = `var(--pillar-${post.pillar.toLowerCase()})`;
   const date = new Date(post.published_at).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -64,7 +68,7 @@ export default async function PostPage({ params }: Props) {
       <Link
         href={pillar.href}
         className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-widest uppercase mb-8 transition-opacity hover:opacity-70"
-        style={{ color: pillar.color }}
+        style={{ color: pillarVar }}
       >
         ← {pillar.full}
       </Link>
@@ -74,22 +78,27 @@ export default async function PostPage({ params }: Props) {
         <span
           className="inline-block text-[10px] font-semibold tracking-widest uppercase mb-4 px-2 py-0.5 rounded-[0.125rem]"
           style={{
-            color: pillar.color,
-            backgroundColor: `${pillar.color}14`,
+            color: pillarVar,
+            border: `1px solid ${pillarVar}`,
           }}
         >
           {pillar.full}
         </span>
 
-        <h1
-          className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.1] mb-4"
-          style={{
-            color: "var(--text-primary)",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          {post.title}
-        </h1>
+        <div className="flex items-start gap-3 mb-4">
+          <div className="pt-2 shrink-0">
+            <SignalStrength level={DEFAULT_SIGNAL} />
+          </div>
+          <h1
+            className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.1]"
+            style={{
+              color: "var(--text-primary)",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {post.title}
+          </h1>
+        </div>
 
         <p
           className="text-base leading-relaxed mb-4"
@@ -113,16 +122,15 @@ export default async function PostPage({ params }: Props) {
         {/* Divider */}
         <div
           className="mt-8 h-[2px] w-12 rounded-full"
-          style={{ backgroundColor: pillar.color }}
+          style={{ backgroundColor: pillarVar }}
         />
       </header>
 
       {/* Body */}
       <article>
         <div
-          className="whitespace-pre-wrap text-base leading-8"
-          style={{ color: "var(--text-secondary)" }}
-          dangerouslySetInnerHTML={{ __html: post.body }}
+          className="post-body"
+          dangerouslySetInnerHTML={{ __html: wrapWhyItMatters(post.body) }}
         />
       </article>
 
