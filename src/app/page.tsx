@@ -8,52 +8,55 @@ export default async function HomePage() {
   const posts = await getPosts();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      {/* Hero */}
-      <div className="mb-12">
-        <p
-          className="text-[10px] font-semibold tracking-widest uppercase mb-3"
-          style={{ color: "#00f0ff" }}
-        >
-          Signal Feed
-        </p>
-        <h1
-          className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(2rem,6vw,4rem)] leading-[1.05] tracking-tight mb-4"
-          style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
-        >
-          The DARQ Era
-          <br />
-          <span style={{ color: "#00f0ff" }}>is already here.</span>
-        </h1>
-        <p
-          className="text-base max-w-xl leading-relaxed"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Signal-driven coverage of Decentralization, AI, Reality, and Quantum
-          Computing — written from a builder&apos;s perspective.
-        </p>
-      </div>
-
-      {/* Feed */}
-      {posts.length === 0 ? (
-        <div className="py-24 text-center">
+    <>
+      {/* Full-bleed atmospheric hero */}
+      <section className="atmos-field">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <p
-            className="text-sm tracking-wide"
-            style={{ color: "var(--text-muted)" }}
+            className="text-[11px] font-semibold tracking-[0.18em] uppercase mb-4"
+            style={{ color: "var(--brand-cyan)" }}
           >
-            Signal incoming. First posts dropping soon.
+            Signal Feed
+          </p>
+          <h1
+            className="hero-title font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(2.5rem,7vw,4.5rem)] leading-[1.05] tracking-[-0.025em] mb-5"
+            style={{ color: "var(--text-primary)" }}
+          >
+            The DARQ Era
+            <br />
+            <span style={{ color: "var(--brand-cyan)" }}>is already here.</span>
+          </h1>
+          <p
+            className="text-lg leading-relaxed max-w-[48ch]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Signal-driven coverage of Decentralization, AI, Reality, and Quantum
+            Computing — written from a builder&apos;s perspective.
           </p>
         </div>
-      ) : (
-        <div>
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      )}
+      </section>
 
-      {/* Newsletter */}
-      <NewsletterCapture />
-    </div>
+      {/* Feed */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {posts.length === 0 ? (
+          <div className="py-24 text-center">
+            <p
+              className="text-sm tracking-wide"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Signal incoming. First posts dropping soon.
+            </p>
+          </div>
+        ) : (
+          <div>
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
+        )}
+
+        <NewsletterCapture />
+      </div>
+    </>
   );
 }
