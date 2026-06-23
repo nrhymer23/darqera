@@ -20,25 +20,25 @@ export const PILLAR_META: Record<
   D: {
     label: "D",
     full: "Decentralized",
-    color: "#dbfcff",
+    color: "#00e5c4",
     href: "/d",
   },
   A: {
     label: "A",
     full: "Artificial Intelligence",
-    color: "#a7ffb3",
+    color: "#39ff8c",
     href: "/a",
   },
   R: {
     label: "R",
     full: "Reality",
-    color: "#fff3f9",
+    color: "#ff3d8a",
     href: "/r",
   },
   Q: {
     label: "Q",
     full: "Quantum",
-    color: "#00f0ff",
+    color: "#b366ff",
     href: "/q",
   },
 };
