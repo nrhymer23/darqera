@@ -24,7 +24,7 @@ export default async function AIPage() {
       <div className="mb-10">
         <p
           className="text-[10px] font-semibold tracking-widest uppercase mb-3"
-          style={{ color: "#a7ffb3" }}
+          style={{ color: "var(--pillar-a)" }}
         >
           Pillar
         </p>
@@ -35,7 +35,7 @@ export default async function AIPage() {
             letterSpacing: "-0.02em",
           }}
         >
-          <span style={{ color: "#a7ffb3" }}>A</span> — Artificial Intelligence
+          <span style={{ color: "var(--pillar-a)" }}>A</span> — Artificial Intelligence
         </h1>
         <p
           className="text-sm max-w-lg leading-relaxed"
@@ -49,7 +49,7 @@ export default async function AIPage() {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No posts yet. Coming soon.
+            No signals yet on this frequency.
           </p>
         </div>
       ) : (

@@ -54,7 +54,7 @@ export default async function TagPage({ params }: Props) {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No posts found for this tag.
+            No signals tagged here yet.
           </p>
         </div>
       ) : (

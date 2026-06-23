@@ -24,7 +24,7 @@ export default async function RealityPage() {
       <div className="mb-10">
         <p
           className="text-[10px] font-semibold tracking-widest uppercase mb-3"
-          style={{ color: "#fff3f9" }}
+          style={{ color: "var(--pillar-r)" }}
         >
           Pillar
         </p>
@@ -35,7 +35,7 @@ export default async function RealityPage() {
             letterSpacing: "-0.02em",
           }}
         >
-          <span style={{ color: "#fff3f9" }}>R</span> — Reality
+          <span style={{ color: "var(--pillar-r)" }}>R</span> — Reality
         </h1>
         <p
           className="text-sm max-w-lg leading-relaxed"
@@ -49,7 +49,7 @@ export default async function RealityPage() {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No posts yet. Coming soon.
+            No signals yet on this frequency.
           </p>
         </div>
       ) : (

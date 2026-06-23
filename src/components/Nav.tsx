@@ -14,11 +14,11 @@ const tabs = [
 ];
 
 const pillarColors: Record<string, string> = {
-  "/": "#00f0ff",
-  "/d": "#dbfcff",
-  "/a": "#a7ffb3",
-  "/r": "#fff3f9",
-  "/q": "#00f0ff",
+  "/": "var(--brand-cyan)",
+  "/d": "var(--pillar-d)",
+  "/a": "var(--pillar-a)",
+  "/r": "var(--pillar-r)",
+  "/q": "var(--pillar-q)",
 };
 
 export default function Nav() {
@@ -41,7 +41,7 @@ export default function Nav() {
         <Link
           href="/"
           className="font-[family-name:var(--font-space-grotesk)] font-bold text-lg tracking-tight hover:opacity-80 transition-opacity"
-          style={{ color: "#00f0ff" }}
+          style={{ color: "var(--brand-cyan)" }}
         >
           DARQ<span style={{ color: "var(--text-primary)" }}>ERA</span>
         </Link>
