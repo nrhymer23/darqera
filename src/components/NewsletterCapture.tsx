@@ -129,18 +129,11 @@ export default function NewsletterCapture() {
               type="submit"
               disabled={status === "loading"}
               id="newsletter-submit"
-              className="px-5 py-2.5 text-sm font-semibold tracking-wide rounded-[0.125rem] transition-all"
+              className="btn-glow px-5 py-2.5 text-sm font-semibold tracking-wide rounded-[0.125rem] transition-all"
               style={{
                 backgroundColor: "#00f0ff",
                 color: "#0e0e0e",
                 opacity: status === "loading" ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.boxShadow =
-                  "0 0 20px rgba(0, 240, 255, 0.3)";
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.boxShadow = "none";
               }}
             >
               {status === "loading" ? "..." : "Subscribe"}

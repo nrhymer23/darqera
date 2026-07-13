@@ -37,6 +37,9 @@ export default function AdminPage() {
   // Delete confirmation
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Editing an existing post (null = creating new)
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   // Load key from session
   useEffect(() => {
     const stored = sessionStorage.getItem("darqera-admin-key");
@@ -111,17 +114,44 @@ export default function AdminPage() {
     );
   }
 
-  async function handleCreate(e: FormEvent) {
+  function resetForm() {
+    setTitle("");
+    setSlug("");
+    setExcerpt("");
+    setBody("");
+    setTags("");
+    setStatus("draft");
+    setEditingId(null);
+  }
+
+  function startEdit(post: Post) {
+    setEditingId(post.id);
+    setTitle(post.title);
+    setSlug(post.slug);
+    setPillar(post.pillar);
+    setExcerpt(post.excerpt || "");
+    setBody(post.body || "");
+    setStatus(post.status);
+    setTags((post.tags || []).join(", "));
+    setError("");
+    setSuccess("");
+    setTab("create");
+  }
+
+  async function handleSave(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
 
+    const editing = editingId !== null;
+
     try {
       const res = await fetch("/api/admin/posts", {
-        method: "POST",
+        method: editing ? "PATCH" : "POST",
         headers: headers(),
         body: JSON.stringify({
+          ...(editing ? { id: editingId } : {}),
           title,
           slug,
           pillar,
@@ -138,23 +168,53 @@ export default function AdminPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Failed to create post.");
+        setError(data.error || `Failed to ${editing ? "update" : "create"} post.`);
         return;
       }
 
-      setSuccess(`Post "${data.post.title}" created successfully.`);
-      // Reset form
-      setTitle("");
-      setSlug("");
-      setExcerpt("");
-      setBody("");
-      setTags("");
-      setStatus("draft");
-      // Refresh list
+      setSuccess(
+        `Post "${data.post.title}" ${editing ? "updated" : "created"} successfully.`
+      );
+      resetForm();
       fetchPosts();
       setTab("posts");
     } catch {
-      setError("Failed to create post.");
+      setError(`Failed to ${editing ? "update" : "create"} post.`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePublishToggle(post: Post) {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    const nextStatus = post.status === "published" ? "draft" : "published";
+
+    try {
+      const res = await fetch("/api/admin/posts", {
+        method: "PATCH",
+        headers: headers(),
+        body: JSON.stringify({ id: post.id, status: nextStatus }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to update status.");
+        return;
+      }
+
+      setSuccess(
+        nextStatus === "published"
+          ? `"${post.title}" is live.`
+          : `"${post.title}" unpublished.`
+      );
+      fetchPosts();
+      fetchMetrics();
+    } catch {
+      setError("Failed to update status.");
     } finally {
       setLoading(false);
     }
@@ -292,7 +352,13 @@ export default function AdminPage() {
                 tab === t ? "var(--text-primary)" : "var(--text-muted)",
             }}
           >
-            {t === "posts" ? "All Posts" : t === "create" ? "Create Post" : "Metrics"}
+            {t === "posts"
+              ? "All Posts"
+              : t === "create"
+              ? editingId
+                ? "Edit Post"
+                : "Create Post"
+              : "Metrics"}
           </button>
         ))}
       </div>
@@ -430,7 +496,7 @@ export default function AdminPage() {
                       </p>
                     </div>
 
-                    {/* Delete */}
+                    {/* Actions: publish/unpublish, edit, delete */}
                     {deleteId === post.id ? (
                       <div className="flex items-center gap-2 shrink-0">
                         <button
@@ -456,16 +522,48 @@ export default function AdminPage() {
                         </button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setDeleteId(post.id)}
-                        className="shrink-0 text-[11px] tracking-wide px-3 py-1.5 rounded-[0.125rem] transition-opacity hover:opacity-70"
-                        style={{
-                          color: "#ff6b6b",
-                          border: "1px solid rgba(255, 107, 107, 0.2)",
-                        }}
-                      >
-                        Delete
-                      </button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handlePublishToggle(post)}
+                          disabled={loading}
+                          id={`admin-publish-${post.slug}`}
+                          className="text-[11px] font-semibold tracking-wide px-3 py-1.5 rounded-[0.125rem] transition-opacity hover:opacity-80"
+                          style={
+                            post.status === "published"
+                              ? {
+                                  color: "var(--text-muted)",
+                                  border: "1px solid var(--border-ghost)",
+                                }
+                              : {
+                                  backgroundColor: "#00f0ff",
+                                  color: "#0e0e0e",
+                                }
+                          }
+                        >
+                          {post.status === "published" ? "Unpublish" : "Publish"}
+                        </button>
+                        <button
+                          onClick={() => startEdit(post)}
+                          id={`admin-edit-${post.slug}`}
+                          className="text-[11px] tracking-wide px-3 py-1.5 rounded-[0.125rem] transition-opacity hover:opacity-70"
+                          style={{
+                            color: "var(--text-secondary)",
+                            border: "1px solid var(--border-ghost)",
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(post.id)}
+                          className="text-[11px] tracking-wide px-3 py-1.5 rounded-[0.125rem] transition-opacity hover:opacity-70"
+                          style={{
+                            color: "#ff6b6b",
+                            border: "1px solid rgba(255, 107, 107, 0.2)",
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     )}
                   </div>
                 );
@@ -475,9 +573,9 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ──── Create Post Form ──── */}
+      {/* ──── Create / Edit Post Form ──── */}
       {tab === "create" && (
-        <form onSubmit={handleCreate} className="flex flex-col gap-5">
+        <form onSubmit={handleSave} className="flex flex-col gap-5">
           {/* Title */}
           <div>
             <label
@@ -659,22 +757,36 @@ export default function AdminPage() {
             type="submit"
             disabled={loading}
             id="admin-create-submit"
-            className="w-full py-3 text-sm font-semibold tracking-wide rounded-[0.125rem] transition-all"
+            className="btn-glow w-full py-3 text-sm font-semibold tracking-wide rounded-[0.125rem] transition-all"
             style={{
               backgroundColor: "#00f0ff",
               color: "#0e0e0e",
               opacity: loading ? 0.6 : 1,
             }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.boxShadow =
-                "0 0 24px rgba(0, 240, 255, 0.3)";
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.boxShadow = "none";
-            }}
           >
-            {loading ? "Creating..." : "Create Post"}
+            {loading
+              ? "Saving..."
+              : editingId
+              ? "Save Changes"
+              : "Create Post"}
           </button>
+
+          {editingId && (
+            <button
+              type="button"
+              onClick={() => {
+                resetForm();
+                setTab("posts");
+              }}
+              className="w-full py-2.5 text-sm tracking-wide rounded-[0.125rem] transition-opacity hover:opacity-70"
+              style={{
+                color: "var(--text-muted)",
+                border: "1px solid var(--border-ghost)",
+              }}
+            >
+              Cancel Edit
+            </button>
+          )}
         </form>
       )}
     </div>

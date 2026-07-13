@@ -269,3 +269,19 @@ a, button, [role="button"] {
   margin: 0 0 8px;
 }
 .why-it-matters > :not(.wim-label) { color: var(--text-secondary); margin-top: 0.5rem; }
+
+/* Nav links: muted by default, brighten on hover; active color is set inline */
+.nav-link {
+  color: var(--text-muted);
+}
+.nav-link:hover {
+  color: var(--text-primary);
+}
+
+/* Brand-cyan CTA glow on hover (replaces imperative mouse handlers) */
+.btn-glow {
+  transition: box-shadow 150ms ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 24px rgba(0, 240, 255, 0.3);
+}

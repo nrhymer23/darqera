@@ -1,35 +1,45 @@
 import { type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { checkAdminAuth, unauthorized } from "@/lib/adminAuth";
 
-// Example POST payload:
+// Example POST payload (pipeline → blog):
 // {
 //   "title": "Signal: Next-Gen LLMs",
 //   "pillar": "A",
-//   "content": "Full parsed article content here...",
+//   "content": "Full draft content (markdown or HTML)...",
 //   "tags": ["llm", "signal"],
-//   "notebookSummary": "NotebookLM parsed summary..."
+//   "notebookSummary": "Optional summary shown in a highlighted block",
+//   "signalStrength": 2,              // optional, 1-3 (cluster consensus)
+//   "sources": ["https://..."],        // optional, rendered as a Sources list
+//   "clusterId": "ai:topic-slug"       // optional, idempotency key
 // }
 
-function unauthorized() {
-  return Response.json({ error: "Unauthorized" }, { status: 401 });
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 export async function POST(request: NextRequest) {
-  // Use a secret token to protect the webhook
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.ADMIN_SECRET_KEY}`) {
-    return unauthorized();
-  }
+  if (!checkAdminAuth(request)) return unauthorized();
 
   if (!supabaseAdmin) {
     return Response.json({ error: "Database unavailable" }, { status: 503 });
   }
 
   try {
-    const bodyText = await request.text();
-    const payload = JSON.parse(bodyText);
-
-    const { title, pillar, content, tags, notebookSummary } = payload;
+    const payload = await request.json();
+    const { title, pillar, content, tags, notebookSummary, signalStrength, sources, clusterId } =
+      payload;
 
     if (!title || !pillar || !content) {
       return Response.json(
@@ -38,41 +48,80 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+    // Idempotency: if this cluster already produced a post, don't duplicate it.
+    if (clusterId) {
+      const { data: existing } = await supabaseAdmin
+        .from("posts")
+        .select("id, slug")
+        .contains("tags", [`cluster:${clusterId}`])
+        .maybeSingle();
+      if (existing) {
+        return Response.json(
+          { success: true, post: existing, duplicate: true },
+          { status: 200 }
+        );
+      }
+    }
 
-    const excerpt = content.slice(0, 150).trim() + "...";
+    const excerpt = content.replace(/<[^>]+>/g, "").slice(0, 150).trim() + "...";
 
-    // Append NotebookLM summary directly into the body as a highlighted block if provided
     let finalBody = content;
     if (notebookSummary) {
       finalBody = `<div class="bg-card p-4 rounded-sm border border-ghost mb-6">
-        <strong class="text-xs tracking-widest uppercase text-muted mb-2 block">NotebookLM Summary</strong>
-        <p class="text-secondary text-sm">${notebookSummary}</p>
+        <strong class="text-xs tracking-widest uppercase text-muted mb-2 block">Summary</strong>
+        <p class="text-secondary text-sm">${escapeHtml(String(notebookSummary))}</p>
       </div>
       ${content}`;
     }
+    if (Array.isArray(sources) && sources.length > 0) {
+      const items = sources
+        .filter((s: unknown): s is string => typeof s === "string")
+        .map((s: string) => {
+          const safe = escapeHtml(s);
+          return `<li><a href="${safe}" rel="noopener noreferrer" target="_blank">${safe}</a></li>`;
+        })
+        .join("\n");
+      finalBody = `${finalBody}\n<h2>Sources</h2>\n<ul>${items}</ul>`;
+    }
 
-    const { data, error } = await supabaseAdmin
-      .from("posts")
-      .insert({
-        title,
-        slug,
-        pillar,
-        excerpt,
-        body: finalBody,
-        status: "draft", // Always save signals as drafts for admin review
-        tags: tags || ["signal"],
-      })
-      .select()
-      .single();
+    const strength =
+      typeof signalStrength === "number" && signalStrength >= 1 && signalStrength <= 3
+        ? Math.round(signalStrength)
+        : null;
+
+    const finalTags: string[] = Array.isArray(tags) && tags.length ? [...tags] : ["signal"];
+    if (clusterId) finalTags.push(`cluster:${clusterId}`);
+
+    const insertPost = (slug: string) =>
+      supabaseAdmin!
+        .from("posts")
+        .insert({
+          title,
+          slug,
+          pillar,
+          excerpt,
+          body: finalBody,
+          status: "draft", // Always save signals as drafts for admin review
+          tags: finalTags,
+          signal_strength: strength,
+        })
+        .select()
+        .single();
+
+    const baseSlug = slugify(title);
+    let { data, error } = await insertPost(baseSlug);
+
+    // Unique-slug collision → retry once with a date suffix instead of 500ing.
+    if (error && error.code === "23505") {
+      const suffix = new Date().toISOString().slice(0, 10);
+      ({ data, error } = await insertPost(`${baseSlug}-${suffix}`));
+    }
 
     if (error) throw error;
 
     return Response.json({ success: true, post: data }, { status: 201 });
-  } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal error";
+    return Response.json({ error: message }, { status: 500 });
   }
 }

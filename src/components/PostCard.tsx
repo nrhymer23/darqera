@@ -3,7 +3,7 @@ import type { Post } from "@/types/post";
 import { PILLAR_META } from "@/types/post";
 import { getReadingTime } from "@/lib/readingTime";
 import SignalStrength from "@/components/SignalStrength";
-import { DEFAULT_SIGNAL } from "@/lib/signal";
+import { postSignalLevel } from "@/lib/signal";
 
 interface PostCardProps {
   post: Post;
@@ -27,7 +27,7 @@ export default function PostCard({ post }: PostCardProps) {
       >
         {/* Signal Strength */}
         <div className="pt-1.5 shrink-0">
-          <SignalStrength level={DEFAULT_SIGNAL} />
+          <SignalStrength level={postSignalLevel(post)} />
         </div>
 
         <div className="flex-1 min-w-0">

@@ -8,7 +8,7 @@ import RelatedPosts from "@/components/RelatedPosts";
 import NewsletterCapture from "@/components/NewsletterCapture";
 import ViewCounter from "@/components/ViewCounter";
 import SignalStrength from "@/components/SignalStrength";
-import { DEFAULT_SIGNAL } from "@/lib/signal";
+import { postSignalLevel } from "@/lib/signal";
 import { wrapWhyItMatters } from "@/lib/postBody";
 
 export const revalidate = 60;
@@ -87,7 +87,7 @@ export default async function PostPage({ params }: Props) {
 
         <div className="flex items-start gap-3 mb-4">
           <div className="pt-2 shrink-0">
-            <SignalStrength level={DEFAULT_SIGNAL} />
+            <SignalStrength level={postSignalLevel(post)} />
           </div>
           <h1
             className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.1]"

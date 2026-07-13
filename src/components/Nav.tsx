@@ -11,6 +11,8 @@ const tabs = [
   { label: "A", href: "/a", title: "Artificial Intelligence" },
   { label: "R", href: "/r", title: "Reality" },
   { label: "Q", href: "/q", title: "Quantum" },
+  { label: "Archive", href: "/archive" },
+  { label: "About", href: "/about" },
 ];
 
 const pillarColors: Record<string, string> = {
@@ -60,20 +62,8 @@ export default function Nav() {
                 <Link
                   href={tab.href}
                   title={tab.title}
-                  className="relative px-4 py-1.5 text-sm font-medium tracking-wide transition-colors font-[family-name:var(--font-space-grotesk)]"
-                  style={{
-                    color: isActive ? accent : "var(--text-muted)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive)
-                      (e.target as HTMLElement).style.color =
-                        "var(--text-primary)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive)
-                      (e.target as HTMLElement).style.color =
-                        "var(--text-muted)";
-                  }}
+                  className="nav-link relative px-4 py-1.5 text-sm font-medium tracking-wide transition-colors font-[family-name:var(--font-space-grotesk)]"
+                  style={isActive ? { color: accent } : undefined}
                 >
                   {tab.label}
                   {isActive && (

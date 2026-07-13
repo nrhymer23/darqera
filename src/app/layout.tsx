@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import ThemeProvider from "@/components/ThemeProvider";
@@ -42,6 +43,11 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
   },
 };
 
@@ -87,6 +93,7 @@ export default function RootLayout({
             © {new Date().getFullYear()} DARQ Era. Signal-driven intelligence.
           </footer>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

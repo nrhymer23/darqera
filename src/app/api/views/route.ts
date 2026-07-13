@@ -34,30 +34,12 @@ export async function POST(request: NextRequest) {
       return Response.json({ view_count: data?.view_count ?? 0 });
     }
 
-    // Increment view count
+    // Atomic increment via SECURITY DEFINER RPC (only touches published posts)
     const { data, error } = await supabase.rpc("increment_view_count", {
       post_slug: slug,
     });
 
-    if (error) {
-      // Fallback: try direct update if RPC doesn't exist
-      const { data: post } = await supabase
-        .from("posts")
-        .select("view_count")
-        .eq("slug", slug)
-        .single();
-
-      if (post) {
-        const newCount = (post.view_count ?? 0) + 1;
-        await supabase
-          .from("posts")
-          .update({ view_count: newCount })
-          .eq("slug", slug);
-
-        viewCache.set(cacheKey, now);
-        return Response.json({ view_count: newCount });
-      }
-
+    if (error || data == null) {
       return Response.json({ error: "Post not found" }, { status: 404 });
     }
 

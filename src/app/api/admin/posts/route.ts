@@ -1,22 +1,12 @@
 import { type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-
-function unauthorized() {
-  return Response.json({ error: "Unauthorized" }, { status: 401 });
-}
-
-function checkAuth(request: NextRequest): boolean {
-  const adminKey = process.env.ADMIN_SECRET_KEY;
-  if (!adminKey) return false;
-  const provided = request.headers.get("x-admin-key");
-  return provided === adminKey;
-}
+import { checkAdminAuth, unauthorized } from "@/lib/adminAuth";
 
 /**
  * GET /api/admin/posts — list all posts (including drafts)
  */
 export async function GET(request: NextRequest) {
-  if (!checkAuth(request)) return unauthorized();
+  if (!checkAdminAuth(request)) return unauthorized();
   if (!supabaseAdmin)
     return Response.json({ error: "Database unavailable" }, { status: 503 });
 
@@ -35,7 +25,7 @@ export async function GET(request: NextRequest) {
  * POST /api/admin/posts — create a new post
  */
 export async function POST(request: NextRequest) {
-  if (!checkAuth(request)) return unauthorized();
+  if (!checkAdminAuth(request)) return unauthorized();
   if (!supabaseAdmin)
     return Response.json({ error: "Database unavailable" }, { status: 503 });
 
@@ -75,11 +65,67 @@ export async function POST(request: NextRequest) {
 }
 
 /**
+ * PATCH /api/admin/posts — update an existing post
+ * Expects JSON body: { id: string, ...fields }
+ * Publishing a draft stamps published_at so the feed orders by real publish time.
+ */
+export async function PATCH(request: NextRequest) {
+  if (!checkAdminAuth(request)) return unauthorized();
+  if (!supabaseAdmin)
+    return Response.json({ error: "Database unavailable" }, { status: 503 });
+
+  const body = await request.json();
+  const { id, title, slug, pillar, excerpt, body: postBody, status, tags } = body;
+
+  if (!id) {
+    return Response.json({ error: "Post ID is required" }, { status: 400 });
+  }
+
+  const updates: Record<string, unknown> = {};
+  if (title !== undefined) updates.title = title;
+  if (slug !== undefined) updates.slug = slug;
+  if (pillar !== undefined) updates.pillar = pillar;
+  if (excerpt !== undefined) updates.excerpt = excerpt;
+  if (postBody !== undefined) updates.body = postBody;
+  if (tags !== undefined) updates.tags = tags;
+
+  if (status !== undefined) {
+    updates.status = status;
+    if (status === "published") {
+      const { data: existing } = await supabaseAdmin
+        .from("posts")
+        .select("status")
+        .eq("id", id)
+        .single();
+      if (existing?.status !== "published") {
+        updates.published_at = new Date().toISOString();
+      }
+    }
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return Response.json({ error: "No fields to update" }, { status: 400 });
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("posts")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error)
+    return Response.json({ error: error.message }, { status: 500 });
+
+  return Response.json({ post: data });
+}
+
+/**
  * DELETE /api/admin/posts — delete a post by ID
  * Expects JSON body: { id: string }
  */
 export async function DELETE(request: NextRequest) {
-  if (!checkAuth(request)) return unauthorized();
+  if (!checkAdminAuth(request)) return unauthorized();
   if (!supabaseAdmin)
     return Response.json({ error: "Database unavailable" }, { status: 503 });
 

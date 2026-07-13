@@ -11,6 +11,8 @@ export interface Post {
   status: "draft" | "published";
   tags: string[];
   view_count?: number;
+  /** Adoption-curve stage set by the signal pipeline: 1 early, 2 emerging, 3 shifting. */
+  signal_strength?: number | null;
 }
 
 export const PILLAR_META: Record<
