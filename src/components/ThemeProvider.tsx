@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useSyncExternalStore,
 } from "react";
 
 type Theme = "light" | "dark" | "system";
@@ -40,14 +41,31 @@ function applyTheme(resolved: "light" | "dark") {
   }
 }
 
+function getStoredTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  const stored = localStorage.getItem("darqera-theme");
+  return stored === "light" || stored === "dark" || stored === "system"
+    ? stored
+    : "dark";
+}
+
+const subscribeToHydration = () => () => {};
+
 export default function ThemeProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>(getStoredTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => {
+    const initial = getStoredTheme();
+    return initial === "system" ? getSystemTheme() : initial;
+  });
+  const mounted = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false
+  );
 
   // Resolve and apply the effective theme
   const resolve = useCallback((t: Theme) => {
@@ -56,14 +74,10 @@ export default function ThemeProvider({
     applyTheme(effective);
   }, []);
 
-  // On mount: read persisted preference
+  // Keep the document class synchronized with the resolved preference.
   useEffect(() => {
-    const stored = localStorage.getItem("darqera-theme") as Theme | null;
-    const initial = stored ?? "dark";
-    setThemeState(initial);
-    resolve(initial);
-    setMounted(true);
-  }, [resolve]);
+    applyTheme(resolvedTheme);
+  }, [resolvedTheme]);
 
   // Listen for system theme changes when mode is "system"
   useEffect(() => {

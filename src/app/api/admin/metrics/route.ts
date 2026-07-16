@@ -50,7 +50,8 @@ export async function GET(request: NextRequest) {
         subscribers: subscribersCount ?? 0,
       },
     });
-  } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return Response.json({ error: message }, { status: 500 });
   }
 }
