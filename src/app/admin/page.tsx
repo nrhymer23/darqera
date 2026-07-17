@@ -3,8 +3,9 @@
 import { useState, useEffect, type FormEvent } from "react";
 import type { Post, Pillar } from "@/types/post";
 import { PILLAR_META } from "@/types/post";
+import { ResearchQueue } from "@/components/admin/ResearchQueue";
 
-type Tab = "posts" | "create" | "metrics";
+type Tab = "research" | "posts" | "create" | "metrics";
 
 interface Metrics {
   publishedPosts: number;
@@ -18,7 +19,7 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [keyInput, setKeyInput] = useState("");
 
-  const [tab, setTab] = useState<Tab>("posts");
+  const [tab, setTab] = useState<Tab>("research");
   const [posts, setPosts] = useState<Post[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(false);
@@ -310,7 +311,7 @@ export default function AdminPage() {
             className="font-[family-name:var(--font-space-grotesk)] font-bold text-2xl"
             style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
           >
-            Post Manager
+            Editorial Control Room
           </h1>
         </div>
         <button
@@ -335,7 +336,7 @@ export default function AdminPage() {
         className="flex gap-1 mb-8 p-1 rounded-[0.125rem]"
         style={{ backgroundColor: "var(--bg-secondary)" }}
       >
-        {(["posts", "create", "metrics"] as Tab[]).map((t) => (
+        {(["research", "posts", "create", "metrics"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => {
@@ -352,7 +353,9 @@ export default function AdminPage() {
                 tab === t ? "var(--text-primary)" : "var(--text-muted)",
             }}
           >
-            {t === "posts"
+            {t === "research"
+              ? "Research"
+              : t === "posts"
               ? "All Posts"
               : t === "create"
               ? editingId
@@ -388,6 +391,8 @@ export default function AdminPage() {
           {success}
         </div>
       )}
+
+      {tab === "research" && <ResearchQueue adminKey={adminKey} />}
 
       {/* ──── Metrics Dashboard ──── */}
       {tab === "metrics" && metrics && (
