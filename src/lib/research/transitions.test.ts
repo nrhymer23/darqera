@@ -29,6 +29,8 @@ const actions: PacketAction[] = [
   "draft_started",
   "draft_completed",
   "draft_failed",
+  "research_dispatch_failed",
+  "draft_dispatch_failed",
 ];
 
 const allowed = new Map<string, PacketState>([
@@ -43,6 +45,8 @@ const allowed = new Map<string, PacketState>([
   ["drafting:draft_failed", "draft_failed"],
   ["research_failed:research_started", "researching"],
   ["draft_failed:draft_started", "drafting"],
+  ["more_research_requested:research_dispatch_failed", "research_failed"],
+  ["approved:draft_dispatch_failed", "draft_failed"],
 ]);
 
 describe("research packet transition policy", () => {

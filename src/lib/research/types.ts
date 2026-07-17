@@ -20,7 +20,9 @@ export type PacketAction =
   | "research_started"
   | "draft_started"
   | "draft_completed"
-  | "draft_failed";
+  | "draft_failed"
+  | "research_dispatch_failed"
+  | "draft_dispatch_failed";
 
 export type ResearchConfidence = "low" | "medium" | "high";
 

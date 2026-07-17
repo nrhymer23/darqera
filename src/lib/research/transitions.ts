@@ -10,8 +10,14 @@ const transitionPolicy: Record<PacketState, Partial<Record<PacketAction, PacketS
     request_more_research: "more_research_requested",
     reject: "rejected",
   },
-  more_research_requested: { research_started: "researching" },
-  approved: { draft_started: "drafting" },
+  more_research_requested: {
+    research_started: "researching",
+    research_dispatch_failed: "research_failed",
+  },
+  approved: {
+    draft_started: "drafting",
+    draft_dispatch_failed: "draft_failed",
+  },
   drafting: {
     draft_completed: "draft_ready",
     draft_failed: "draft_failed",
