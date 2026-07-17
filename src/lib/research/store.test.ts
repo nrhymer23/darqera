@@ -122,8 +122,8 @@ describe("packet mutations", () => {
     expect(result).toEqual({ ...stored, replayed: true });
   });
 
-  it("maps PostgreSQL serialization failures to PacketConflictError", async () => {
-    const rpc = vi.fn(() => chain({ data: null, error: { code: "40001", message: "raw detail" } }));
+  it.each(["40001", "PT409"])("maps database conflict %s to PacketConflictError", async (code) => {
+    const rpc = vi.fn(() => chain({ data: null, error: { code, message: "raw detail" } }));
     const client = clientWith({
       tables: {
         darq_action_idempotency: [

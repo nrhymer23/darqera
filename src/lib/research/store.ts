@@ -56,7 +56,7 @@ function dbOrThrow(client?: ResearchDb): ResearchDb {
 
 function throwSafe(error: DbError | null): void {
   if (!error) return;
-  if (error.code === "40001" || error.code === "23505") {
+  if (error.code === "PT409" || error.code === "40001" || error.code === "23505") {
     throw new PacketConflictError();
   }
   throw new ResearchStoreError();
