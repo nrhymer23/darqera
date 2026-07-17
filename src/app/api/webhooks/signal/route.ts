@@ -11,7 +11,8 @@ import { checkAdminAuth, unauthorized } from "@/lib/adminAuth";
 //   "notebookSummary": "Optional summary shown in a highlighted block",
 //   "signalStrength": 2,              // optional, 1-3 (cluster consensus)
 //   "sources": ["https://..."],        // optional, rendered as a Sources list
-//   "clusterId": "ai:topic-slug"       // optional, idempotency key
+//   "snapshotId": "uuid",              // preferred, approval idempotency key
+//   "clusterId": "ai:topic-slug"       // legacy compatibility key
 // }
 
 function escapeHtml(text: string): string {
@@ -38,8 +39,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const payload = await request.json();
-    const { title, pillar, content, tags, notebookSummary, signalStrength, sources, clusterId } =
-      payload;
+    const {
+      title, pillar, content, tags, notebookSummary, signalStrength, sources,
+      clusterId, snapshotId,
+    } = payload;
 
     if (!title || !pillar || !content) {
       return Response.json(
@@ -48,16 +51,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Idempotency: if this cluster already produced a post, don't duplicate it.
-    if (clusterId) {
+    if (!snapshotId && !clusterId) {
+      return Response.json(
+        { error: "Missing required identifier (snapshotId or clusterId)" },
+        { status: 400 },
+      );
+    }
+
+    // New approvals dedupe by immutable snapshot. Cluster tags remain available
+    // for records produced by the legacy drafting path.
+    const idempotencyTag = snapshotId
+      ? `snapshot:${snapshotId}`
+      : `cluster:${clusterId}`;
+    if (idempotencyTag) {
       const { data: existing } = await supabaseAdmin
         .from("posts")
         .select("id, slug")
-        .contains("tags", [`cluster:${clusterId}`])
+        .contains("tags", [idempotencyTag])
         .maybeSingle();
       if (existing) {
         return Response.json(
-          { success: true, post: existing, duplicate: true },
+          {
+            success: true,
+            status: "draft",
+            published: false,
+            post: existing,
+            url: `/admin?post=${existing.id}`,
+            duplicate: true,
+          },
           { status: 200 }
         );
       }
@@ -91,6 +112,7 @@ export async function POST(request: NextRequest) {
 
     const finalTags: string[] = Array.isArray(tags) && tags.length ? [...tags] : ["signal"];
     if (clusterId) finalTags.push(`cluster:${clusterId}`);
+    if (snapshotId) finalTags.push(`snapshot:${snapshotId}`);
 
     const insertPost = (slug: string) =>
       supabaseAdmin!
@@ -119,7 +141,14 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    return Response.json({ success: true, post: data }, { status: 201 });
+    return Response.json({
+      success: true,
+      status: "draft",
+      published: false,
+      post: data,
+      url: `/admin?post=${data.id}`,
+      duplicate: false,
+    }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal error";
     return Response.json({ error: message }, { status: 500 });
