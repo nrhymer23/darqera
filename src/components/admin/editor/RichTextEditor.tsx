@@ -5,6 +5,7 @@ import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
+import { DOMParser as ProseMirrorDOMParser } from "@tiptap/pm/model";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { useEffect, useState } from "react";
 
@@ -37,7 +38,14 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
   });
 
   useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
+    if (!editor || value === editor.getHTML()) return;
+
+    const container = document.createElement("div");
+    container.innerHTML = value;
+    const nextDocument = ProseMirrorDOMParser.fromSchema(editor.schema).parse(
+      container,
+    );
+    if (!nextDocument.eq(editor.state.doc)) {
       editor.commands.setContent(value, { emitUpdate: false });
     }
   }, [editor, value]);

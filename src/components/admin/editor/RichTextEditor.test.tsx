@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
 
+import { Editor } from "@tiptap/core";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { RichTextEditor } from "./RichTextEditor";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe("RichTextEditor", () => {
   it("renders existing paragraph HTML as editable text instead of literal tags", async () => {
@@ -42,9 +46,65 @@ describe("RichTextEditor", () => {
       "Redo",
       "Clear formatting",
       "HTML source",
+      "Align left",
+      "Align center",
+      "Align right",
     ]) {
       expect(await screen.findByRole("button", { name })).toBeInTheDocument();
     }
+
+    const blockStyle = await screen.findByRole("combobox", { name: "Block style" });
+    expect(blockStyle).toHaveDisplayValue("Paragraph");
+    expect(screen.getByRole("option", { name: "Heading 1" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Heading 2" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Heading 3" })).toBeInTheDocument();
+  });
+
+  it("preserves editor content and selection for equivalent parent HTML", async () => {
+    const commandsGetter = Object.getOwnPropertyDescriptor(
+      Editor.prototype,
+      "commands",
+    )?.get;
+    expect(commandsGetter).toBeTypeOf("function");
+    const setContent = vi.fn();
+    vi.spyOn(Editor.prototype, "commands", "get").mockImplementation(function () {
+      const commands = commandsGetter!.call(this);
+      return {
+        ...commands,
+        setContent: (...args: Parameters<typeof commands.setContent>) => {
+          setContent(...args);
+          return commands.setContent(...args);
+        },
+      };
+    });
+    const { rerender } = render(
+      <RichTextEditor value="<p>Keep me</p>" onChange={vi.fn()} adminKey="key" />,
+    );
+    const editor = await screen.findByRole("textbox", { name: "Post body" });
+    const paragraph = editor.querySelector("p");
+    const text = paragraph?.firstChild;
+    expect(text).toBeInstanceOf(Text);
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.setStart(text!, 4);
+    range.collapse(true);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+
+    rerender(
+      <RichTextEditor
+        value={"<p>Keep me</p>\n"}
+        onChange={vi.fn()}
+        adminKey="key"
+      />,
+    );
+
+    expect(editor.querySelector("p")).toBe(paragraph);
+    expect(editor).toHaveTextContent("Keep me");
+    expect(selection?.anchorNode).toBe(text);
+    expect(selection?.anchorOffset).toBe(4);
+    expect(setContent).not.toHaveBeenCalled();
   });
 
   it("round-trips changes through HTML source mode", async () => {
