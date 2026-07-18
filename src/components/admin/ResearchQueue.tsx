@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { ClusterPicker } from "./ClusterPicker";
 import { ResearchPacketDetail } from "./ResearchPacketDetail";
 import type { PacketState, ResearchPacket, ResearchPacketDetail as PacketDetail } from "@/lib/research/types";
 
@@ -70,6 +71,12 @@ export function ResearchQueue({ adminKey }: { adminKey: string }) {
 
   return (
     <div>
+      <ClusterPicker adminKey={adminKey} onStarted={refresh} />
+
+      <div className="mb-5 pt-2" style={{ borderTop: "1px solid var(--border-ghost)" }}>
+        <p className="text-[10px] uppercase tracking-[0.2em] mt-7 mb-2" style={{ color: "var(--brand-cyan)" }}>Canonical workflow</p>
+        <h3 className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>Research queue</h3>
+      </div>
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <select aria-label="Research state" value={state} onChange={(event) => setState(event.target.value as "" | PacketState)} className="px-3 py-2 text-sm" style={{ color: "var(--text-primary)", background: "var(--bg-card)", border: "1px solid var(--border-ghost)" }}>
           {states.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
