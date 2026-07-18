@@ -4,14 +4,17 @@ import {
   PacketConflictError,
   ResearchStoreError,
   approvePacket,
+  getEligibleCluster,
   getPacketDetail,
+  listEligibleClusters,
   listPackets,
   requestMoreResearch,
+  startClusterResearch,
 } from "./store";
 
 function chain(result: unknown) {
   const query: Record<string, ReturnType<typeof vi.fn>> = {};
-  for (const method of ["select", "eq", "order", "range", "single", "maybeSingle", "insert", "update"]) {
+  for (const method of ["select", "eq", "in", "order", "range", "single", "maybeSingle", "insert", "update"]) {
     query[method] = vi.fn(() => query);
   }
   query.then = vi.fn((resolve) => Promise.resolve(result).then(resolve));
@@ -51,6 +54,74 @@ describe("listPackets", () => {
     expect(query.eq).toHaveBeenCalledWith("cluster.pillar", "AI");
     expect(query.range).toHaveBeenCalledWith(10, 19);
     expect(result).toMatchObject({ packets, total: 31, page: 2, pageSize: 10 });
+  });
+});
+
+describe("eligible clusters", () => {
+  it("lists validated clusters without an existing research packet", async () => {
+    const clusters = [
+      { cluster_id: "c1", status: "validated", cluster_score: 91 },
+      { cluster_id: "c2", status: "validated", cluster_score: 84 },
+    ];
+    const clusterQuery = chain({ data: clusters, error: null });
+    const packetQuery = chain({ data: [{ cluster_id: "c2" }], error: null });
+    const client = clientWith({
+      tables: {
+        darq_signal_clusters: [clusterQuery],
+        darq_research_packets: [packetQuery],
+      },
+    });
+
+    const result = await listEligibleClusters(client);
+
+    expect(clusterQuery.eq).toHaveBeenCalledWith("status", "validated");
+    expect(clusterQuery.order).toHaveBeenCalledWith("cluster_score", { ascending: false });
+    expect(result).toEqual([clusters[0]]);
+  });
+
+  it("resolves the selected cluster's underlying source items", async () => {
+    const cluster = { cluster_id: "c1", status: "validated", item_ids: ["i1", "i2"] };
+    const rawItems = [{ item_id: "i1", title: "Source one" }, { item_id: "i2", title: "Source two" }];
+    const clusterQuery = chain({ data: cluster, error: null });
+    const itemQuery = chain({ data: rawItems, error: null });
+    const client = clientWith({
+      tables: {
+        darq_signal_clusters: [clusterQuery],
+        darq_raw_items: [itemQuery],
+      },
+    });
+
+    const result = await getEligibleCluster("c1", client);
+
+    expect(clusterQuery.eq).toHaveBeenCalledWith("cluster_id", "c1");
+    expect(clusterQuery.eq).toHaveBeenCalledWith("status", "validated");
+    expect(itemQuery.in).toHaveBeenCalledWith("item_id", ["i1", "i2"]);
+    expect(result).toMatchObject({ cluster_id: "c1", sources: rawItems });
+  });
+
+  it("starts one canonical packet through the atomic RPC", async () => {
+    const rpc = vi.fn(() => chain({
+      data: [{ packet_id: "p1", state: "researching", version: 0, replayed: false }],
+      error: null,
+    }));
+    const client = clientWith({ rpc });
+
+    const result = await startClusterResearch({
+      clusterId: "c1",
+      direction: "Verify enterprise adoption",
+      idempotencyKey: "start-c1",
+      actorId: "noel",
+      origin: "darqera",
+    }, client);
+
+    expect(rpc).toHaveBeenCalledWith("start_cluster_research", {
+      p_cluster_id: "c1",
+      p_direction: "Verify enterprise adoption",
+      p_idempotency_key: "start-c1",
+      p_actor_id: "noel",
+      p_origin: "darqera",
+    });
+    expect(result).toEqual({ packetId: "p1", state: "researching", version: 0, replayed: false });
   });
 });
 

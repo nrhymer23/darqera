@@ -26,6 +26,41 @@ export type PacketAction =
 
 export type ResearchConfidence = "low" | "medium" | "high";
 
+export type DarqPillar = "AI" | "Decentralized" | "Reality" | "Quantum";
+
+export interface EligibleClusterSummary {
+  cluster_id: string;
+  pillar: DarqPillar;
+  topic_label: string;
+  summary: string | null;
+  source_count: number;
+  tier1_count: number;
+  tier2_count: number;
+  tier3_count: number;
+  freshness_hours: number | null;
+  cluster_score: number | null;
+  score_breakdown: Record<string, unknown>;
+  source_urls: string[];
+  item_ids: string[];
+}
+
+export interface ClusterSourceItem {
+  item_id: string;
+  source_url: string;
+  source_name: string;
+  source_tier: number;
+  platform: string;
+  pillar: DarqPillar;
+  title: string;
+  raw_text: string;
+  published_at: string | null;
+  collected_at: string;
+}
+
+export interface EligibleClusterDetail extends EligibleClusterSummary {
+  sources: ClusterSourceItem[];
+}
+
 export interface ResearchSource {
   url: string;
   title: string;

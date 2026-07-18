@@ -1,6 +1,8 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import type {
+  EligibleClusterDetail,
+  EligibleClusterSummary,
   PacketState,
   ResearchPacket,
   ResearchPacketDetail,
@@ -21,6 +23,7 @@ interface QueryResult {
 interface QueryBuilder extends PromiseLike<QueryResult> {
   select(columns?: string, options?: Record<string, unknown>): QueryBuilder;
   eq(column: string, value: unknown): QueryBuilder;
+  in(column: string, values: unknown[]): QueryBuilder;
   order(column: string, options?: Record<string, unknown>): QueryBuilder;
   range(from: number, to: number): QueryBuilder;
   single(): QueryBuilder;
@@ -67,6 +70,106 @@ export interface PacketListFilters {
   pillar?: "AI" | "Decentralized" | "Reality" | "Quantum";
   page?: number;
   pageSize?: number;
+}
+
+const eligibleClusterColumns = [
+  "cluster_id",
+  "pillar",
+  "topic_label",
+  "summary",
+  "source_count",
+  "tier1_count",
+  "tier2_count",
+  "tier3_count",
+  "freshness_hours",
+  "cluster_score",
+  "score_breakdown",
+  "source_urls",
+  "item_ids",
+].join(",");
+
+export async function listEligibleClusters(client?: ResearchDb): Promise<EligibleClusterSummary[]> {
+  const db = dbOrThrow(client);
+  const clusterResult = await db
+    .from("darq_signal_clusters")
+    .select(eligibleClusterColumns)
+    .eq("status", "validated")
+    .order("cluster_score", { ascending: false })
+    .range(0, 99);
+  const packetResult = await db
+    .from("darq_research_packets")
+    .select("cluster_id")
+    .range(0, 999);
+  throwSafe(clusterResult.error);
+  throwSafe(packetResult.error);
+  const started = new Set(
+    ((packetResult.data ?? []) as Array<{ cluster_id: string }>).map((row) => row.cluster_id),
+  );
+  return ((clusterResult.data ?? []) as EligibleClusterSummary[])
+    .filter((cluster) => !started.has(cluster.cluster_id));
+}
+
+export async function getEligibleCluster(
+  clusterId: string,
+  client?: ResearchDb,
+): Promise<EligibleClusterDetail> {
+  const db = dbOrThrow(client);
+  const clusterResult = await db
+    .from("darq_signal_clusters")
+    .select(eligibleClusterColumns)
+    .eq("cluster_id", clusterId)
+    .eq("status", "validated")
+    .single();
+  throwSafe(clusterResult.error);
+  if (!clusterResult.data) throw new PacketConflictError("This signal is no longer eligible for research.");
+  const cluster = clusterResult.data as EligibleClusterSummary;
+  if (cluster.item_ids.length === 0) return { ...cluster, sources: [] };
+  const sourceResult = await db
+    .from("darq_raw_items")
+    .select("item_id,source_url,source_name,source_tier,platform,pillar,title,raw_text,published_at,collected_at")
+    .in("item_id", cluster.item_ids)
+    .order("published_at", { ascending: false });
+  throwSafe(sourceResult.error);
+  return {
+    ...cluster,
+    sources: (sourceResult.data ?? []) as EligibleClusterDetail["sources"],
+  };
+}
+
+export interface StartClusterResearchInput {
+  clusterId: string;
+  direction: string;
+  idempotencyKey: string;
+  actorId: string;
+  origin: Exclude<ReviewOrigin, "pipeline">;
+}
+
+export async function startClusterResearch(
+  input: StartClusterResearchInput,
+  client?: ResearchDb,
+) {
+  const db = dbOrThrow(client);
+  const response = await db.rpc("start_cluster_research", {
+    p_cluster_id: input.clusterId,
+    p_direction: input.direction,
+    p_idempotency_key: input.idempotencyKey,
+    p_actor_id: input.actorId,
+    p_origin: input.origin,
+  });
+  throwSafe(response.error);
+  const row = (response.data as Array<{
+    packet_id: string;
+    state: PacketState;
+    version: number;
+    replayed: boolean;
+  }> | null)?.[0];
+  if (!row) throw new ResearchStoreError();
+  return {
+    packetId: row.packet_id,
+    state: row.state,
+    version: row.version,
+    replayed: row.replayed,
+  };
 }
 
 export async function listPackets(
