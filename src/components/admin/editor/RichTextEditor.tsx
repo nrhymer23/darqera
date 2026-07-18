@@ -10,6 +10,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import { useEffect, useState } from "react";
 
 import { EditorToolbar } from "./EditorToolbar";
+import { ImageUploadDialog } from "./ImageUploadDialog";
 
 type RichTextEditorProps = {
   value: string;
@@ -20,6 +21,7 @@ type RichTextEditorProps = {
 export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProps) {
   const [sourceMode, setSourceMode] = useState(false);
   const [sourceValue, setSourceValue] = useState("");
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -62,16 +64,11 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
     setSourceMode(true);
   };
 
-  // Task 4 replaces this trigger with the accessible image upload dialog.
-  const openImageDialog = () => {
-    void adminKey;
-  };
-
   return (
     <div className="admin-rich-editor">
       <EditorToolbar
         editor={editor}
-        onInsertImage={openImageDialog}
+        onInsertImage={() => setImageDialogOpen(true)}
         sourceMode={sourceMode}
         onToggleSourceMode={toggleSourceMode}
       />
@@ -92,6 +89,15 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
           className="admin-rich-editor__content"
         />
       )}
+      <ImageUploadDialog
+        open={imageDialogOpen}
+        adminKey={adminKey}
+        onClose={() => setImageDialogOpen(false)}
+        onInsert={(image) => {
+          editor.chain().focus().setImage({ src: image.src, alt: image.alt }).run();
+          setImageDialogOpen(false);
+        }}
+      />
     </div>
   );
 }

@@ -2,14 +2,19 @@
 import "@testing-library/jest-dom/vitest";
 
 import { Editor } from "@tiptap/core";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RichTextEditor } from "./RichTextEditor";
+
+beforeEach(() => {
+  vi.stubGlobal("fetch", vi.fn());
+});
 
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe("RichTextEditor", () => {
@@ -122,6 +127,43 @@ describe("RichTextEditor", () => {
     expect(await screen.findByText("Revised")).toBeInTheDocument();
     expect(onChange).toHaveBeenLastCalledWith(
       expect.stringContaining("<h2>Revised</h2>"),
+    );
+  });
+
+  it("uploads and inserts an image with safe src and alt attributes", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          image: {
+            url: "https://cdn.test/image.webp",
+            path: "2026/07/id.webp",
+          },
+        }),
+        { status: 201 },
+      ),
+    );
+    const onChange = vi.fn();
+    render(
+      <RichTextEditor value="<p>Body</p>" onChange={onChange} adminKey="key" />,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Insert image" }));
+    fireEvent.change(screen.getByLabelText("Image file"), {
+      target: {
+        files: [new File(["image"], "image.webp", { type: "image/webp" })],
+      },
+    });
+    fireEvent.change(screen.getByLabelText("Alt text"), {
+      target: { value: "A quantum processor" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload and insert" }));
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '<img src="https://cdn.test/image.webp" alt="A quantum processor">',
+        ),
+      ),
     );
   });
 });
