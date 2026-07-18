@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   markDispatchFailed: vi.fn(),
   rejectPacket: vi.fn(),
   requestMoreResearch: vi.fn(),
+  startClusterResearch: vi.fn(),
   dispatchDraft: vi.fn(),
   dispatchResearch: vi.fn(),
 }));
@@ -21,6 +22,7 @@ vi.mock("./store", () => ({
   markDispatchFailed: mocks.markDispatchFailed,
   rejectPacket: mocks.rejectPacket,
   requestMoreResearch: mocks.requestMoreResearch,
+  startClusterResearch: mocks.startClusterResearch,
 }));
 
 vi.mock("./githubDispatch", () => ({
@@ -28,7 +30,7 @@ vi.mock("./githubDispatch", () => ({
   dispatchResearch: mocks.dispatchResearch,
 }));
 
-import { PacketActionValidationError, performPacketAction } from "./actions";
+import { PacketActionValidationError, performPacketAction, startFocusedResearch } from "./actions";
 
 const base = {
   packetId: "p1",
@@ -114,5 +116,67 @@ describe("performPacketAction", () => {
     const result = await performPacketAction({ ...base, action: "approve", angle: "Angle" });
     expect(mocks.dispatchDraft).not.toHaveBeenCalled();
     expect(result).toMatchObject({ replayed: true });
+  });
+});
+
+describe("startFocusedResearch", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.dispatchResearch.mockResolvedValue({ accepted: true });
+    mocks.markDispatchFailed.mockResolvedValue({ state: "research_failed", version: 1 });
+  });
+
+  it("creates canonical state before dispatching one focused packet", async () => {
+    mocks.startClusterResearch.mockResolvedValue({
+      packetId: "p1", state: "researching", version: 0, replayed: false,
+    });
+
+    const result = await startFocusedResearch({
+      clusterId: "c1",
+      direction: "Verify enterprise adoption",
+      idempotencyKey: "start-c1",
+      origin: "darqera",
+      actorId: "noel",
+    });
+
+    expect(mocks.startClusterResearch).toHaveBeenCalledWith(expect.objectContaining({ clusterId: "c1" }));
+    expect(mocks.dispatchResearch).toHaveBeenCalledWith({
+      packetId: "p1", feedback: "Verify enterprise adoption", idempotencyKey: "start-c1",
+    });
+    expect(result).toMatchObject({ packetId: "p1", replayed: false });
+  });
+
+  it("does not dispatch an existing cluster packet twice", async () => {
+    mocks.startClusterResearch.mockResolvedValue({
+      packetId: "p1", state: "researching", version: 0, replayed: true,
+    });
+
+    const result = await startFocusedResearch({
+      clusterId: "c1", direction: "", idempotencyKey: "start-c1", origin: "darqera", actorId: "noel",
+    });
+
+    expect(mocks.dispatchResearch).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ replayed: true });
+  });
+
+  it("requires an idempotency key", async () => {
+    await expect(startFocusedResearch({
+      clusterId: "c1", direction: "", idempotencyKey: " ", origin: "darqera", actorId: "noel",
+    })).rejects.toBeInstanceOf(PacketActionValidationError);
+    expect(mocks.startClusterResearch).not.toHaveBeenCalled();
+  });
+
+  it("records a safe research failure when dispatch is rejected", async () => {
+    mocks.startClusterResearch.mockResolvedValue({
+      packetId: "p1", state: "researching", version: 0, replayed: false,
+    });
+    mocks.dispatchResearch.mockRejectedValue(new Error("raw GitHub response"));
+
+    await expect(startFocusedResearch({
+      clusterId: "c1", direction: "", idempotencyKey: "start-c1", origin: "darqera", actorId: "noel",
+    })).rejects.toThrow("The research job could not be started");
+    expect(mocks.markDispatchFailed).toHaveBeenCalledWith(expect.objectContaining({
+      packetId: "p1", expectedState: "researching", expectedVersion: 0,
+    }));
   });
 });

@@ -7,6 +7,7 @@ import {
   markDispatchFailed,
   rejectPacket,
   requestMoreResearch,
+  startClusterResearch,
 } from "./store";
 import type { PacketState, ReviewOrigin } from "./types";
 
@@ -41,6 +42,45 @@ export class PacketDispatchError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "PacketDispatchError";
+  }
+}
+
+export interface StartFocusedResearchInput {
+  clusterId: string;
+  direction: string;
+  idempotencyKey: string;
+  origin: Exclude<ReviewOrigin, "pipeline">;
+  actorId: string;
+}
+
+export async function startFocusedResearch(input: StartFocusedResearchInput) {
+  const clusterId = requiredText(input.clusterId, "A signal cluster is required");
+  const idempotencyKey = requiredText(input.idempotencyKey, "An idempotency key is required");
+  const direction = input.direction.trim();
+  const started = await startClusterResearch({
+    ...input,
+    clusterId,
+    direction,
+    idempotencyKey,
+  });
+  if (started.replayed) return started;
+  try {
+    await dispatchResearch({
+      packetId: started.packetId,
+      feedback: direction,
+      idempotencyKey,
+    });
+    return started;
+  } catch {
+    await markDispatchFailed({
+      packetId: started.packetId,
+      expectedState: "researching",
+      expectedVersion: started.version,
+      actorId: input.actorId,
+      origin: input.origin,
+      idempotencyKey: `${idempotencyKey}:dispatch-failed`,
+    });
+    throw new PacketDispatchError("The research job could not be started");
   }
 }
 
