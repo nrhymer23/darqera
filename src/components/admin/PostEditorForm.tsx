@@ -99,7 +99,13 @@ export function PostEditorForm({
       </div>
 
       <div>
-        <label htmlFor="admin-post-body" className="block text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
+        <label
+          id="admin-post-body-label"
+          htmlFor="admin-post-body"
+          onClick={() => document.getElementById("admin-post-body")?.focus()}
+          className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
+          style={{ color: "var(--text-muted)" }}
+        >
           Body
         </label>
         <RichTextEditor value={body} onChange={setBody} adminKey={adminKey} />

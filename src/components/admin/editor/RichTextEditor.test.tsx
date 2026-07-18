@@ -5,9 +5,21 @@ import { Editor } from "@tiptap/core";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const mocks = vi.hoisted(() => ({ editorUnavailable: false }));
+
+vi.mock("@tiptap/react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tiptap/react")>();
+  return {
+    ...actual,
+    useEditor: (...args: Parameters<typeof actual.useEditor>) =>
+      mocks.editorUnavailable ? null : actual.useEditor(...args),
+  };
+});
+
 import { RichTextEditor } from "./RichTextEditor";
 
 beforeEach(() => {
+  mocks.editorUnavailable = false;
   vi.stubGlobal("fetch", vi.fn());
 });
 
@@ -144,6 +156,45 @@ describe("RichTextEditor", () => {
     expect(onChange).toHaveBeenLastCalledWith(
       expect.stringContaining("<h2>Revised</h2>"),
     );
+  });
+
+  it("reports source edits immediately without waiting for visual mode", async () => {
+    const onChange = vi.fn();
+    render(
+      <RichTextEditor value="<p>Original</p>" onChange={onChange} adminKey="key" />,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "HTML source" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Post body HTML" }), {
+      target: { value: "<h2>Saved directly</h2>" },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith("<h2>Saved directly</h2>");
+  });
+
+  it("renders a bound HTML fallback when the editor is unavailable", () => {
+    mocks.editorUnavailable = true;
+    const onChange = vi.fn();
+
+    render(
+      <RichTextEditor value="<p>Preserved</p>" onChange={onChange} adminKey="key" />,
+    );
+
+    expect(screen.getByText("Rich text editor unavailable. Edit HTML directly.")).toBeInTheDocument();
+    const fallback = screen.getByRole("textbox", { name: "Post body" });
+    expect(fallback).toHaveValue("<p>Preserved</p>");
+    fireEvent.change(fallback, { target: { value: "<p>Still editable</p>" } });
+    expect(onChange).toHaveBeenCalledWith("<p>Still editable</p>");
+  });
+
+  it("sets aria-pressed when a formatting control becomes active", async () => {
+    render(
+      <RichTextEditor value="<p>Body</p>" onChange={vi.fn()} adminKey="key" />,
+    );
+
+    const bold = await screen.findByRole("button", { name: "Bold" });
+    fireEvent.click(bold);
+    expect(bold).toHaveAttribute("aria-pressed", "true");
   });
 
   it("uploads and inserts an image with safe src and alt attributes", async () => {

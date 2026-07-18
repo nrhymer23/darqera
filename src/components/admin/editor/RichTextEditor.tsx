@@ -19,6 +19,7 @@ type RichTextEditorProps = {
 };
 
 export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProps) {
+  const [, setEditorRevision] = useState(0);
   const [sourceMode, setSourceMode] = useState(false);
   const [sourceValue, setSourceValue] = useState("");
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
@@ -36,7 +37,16 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content: value,
+    editorProps: {
+      attributes: {
+        id: "admin-post-body",
+        role: "textbox",
+        "aria-label": "Post body",
+        "aria-labelledby": "admin-post-body-label",
+      },
+    },
     onUpdate: ({ editor: currentEditor }) => onChange(currentEditor.getHTML()),
+    onTransaction: () => setEditorRevision((revision) => revision + 1),
   });
 
   useEffect(() => {
@@ -52,7 +62,20 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
     }
   }, [editor, value]);
 
-  if (!editor) return null;
+  if (!editor) {
+    return (
+      <div className="admin-rich-editor admin-rich-editor--fallback">
+        <p>Rich text editor unavailable. Edit HTML directly.</p>
+        <textarea
+          id="admin-post-body"
+          aria-label="Post body"
+          aria-labelledby="admin-post-body-label"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
+    );
+  }
 
   const toggleSourceMode = () => {
     if (sourceMode) {
@@ -79,15 +102,16 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
             id="admin-post-body"
             aria-label="Post body HTML"
             value={sourceValue}
-            onChange={(event) => setSourceValue(event.target.value)}
+            onChange={(event) => {
+              const html = event.target.value;
+              setSourceValue(html);
+              onChange(html);
+            }}
           />
         </label>
       ) : (
         <EditorContent
           editor={editor}
-          id="admin-post-body"
-          role="textbox"
-          aria-label="Post body"
           className="admin-rich-editor__content"
         />
       )}
@@ -96,7 +120,7 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
         adminKey={adminKey}
         onClose={() => setImageDialogOpen(false)}
         onInsert={(image) => {
-          editor.chain().focus().setImage({ src: image.src, alt: image.alt }).run();
+          editor.chain().setImage({ src: image.src, alt: image.alt }).run();
           setImageDialogOpen(false);
         }}
       />

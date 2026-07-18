@@ -2,6 +2,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ImageUploadDialog } from "./ImageUploadDialog";
@@ -30,6 +31,51 @@ describe("ImageUploadDialog", () => {
       "aria-modal",
       "true",
     );
+    expect(screen.getByLabelText("Image file")).toHaveFocus();
+  });
+
+  it("closes with Escape and restores focus to the trigger", () => {
+    const onClose = vi.fn();
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>Insert image</button>
+          <ImageUploadDialog
+            open={open}
+            adminKey="key"
+            onClose={() => { onClose(); setOpen(false); }}
+            onInsert={vi.fn()}
+          />
+        </>
+      );
+    }
+    render(<Harness />);
+    const trigger = screen.getByRole("button", { name: "Insert image" });
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it("contains Tab and Shift+Tab focus within the dialog", () => {
+    render(
+      <ImageUploadDialog open adminKey="key" onClose={vi.fn()} onInsert={vi.fn()} />,
+    );
+    const file = screen.getByLabelText("Image file");
+    const submit = screen.getByRole("button", { name: "Upload and insert" });
+
+    submit.focus();
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Tab" });
+    expect(file).toHaveFocus();
+
+    file.focus();
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Tab", shiftKey: true });
+    expect(submit).toHaveFocus();
   });
 
   it("requires both an image and alt text", async () => {
@@ -112,6 +158,28 @@ describe("ImageUploadDialog", () => {
     expect(screen.getByRole("button", { name: "Uploading…" })).toBeDisabled();
     expect(screen.getByLabelText("Image file")).toBeDisabled();
     expect(screen.getByLabelText("Alt text")).toBeDisabled();
+  });
+
+  it("does not close with Escape while an upload is pending", () => {
+    vi.mocked(fetch).mockReturnValue(new Promise(() => {}));
+    const onClose = vi.fn();
+    render(
+      <ImageUploadDialog open adminKey="key" onClose={onClose} onInsert={vi.fn()} />,
+    );
+    fireEvent.change(screen.getByLabelText("Image file"), {
+      target: {
+        files: [new File(["image"], "image.webp", { type: "image/webp" })],
+      },
+    });
+    fireEvent.change(screen.getByLabelText("Alt text"), {
+      target: { value: "A quantum processor" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload and insert" }));
+
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("keeps the dialog open with a safe error and enables retry after failure", async () => {

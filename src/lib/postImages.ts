@@ -43,8 +43,17 @@ export async function uploadPostImage(
 
   if (error) throw new Error("Image upload failed.");
 
+  const publicUrl = bucket.getPublicUrl(path).data.publicUrl;
+  try {
+    if (new URL(publicUrl).protocol !== "https:") {
+      throw new Error("unsafe protocol");
+    }
+  } catch {
+    throw new Error("Image upload failed.");
+  }
+
   return {
-    url: bucket.getPublicUrl(path).data.publicUrl,
+    url: publicUrl,
     path,
   };
 }

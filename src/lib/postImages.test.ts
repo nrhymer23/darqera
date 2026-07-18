@@ -47,9 +47,10 @@ describe("post images", () => {
   });
 
   it("uploads to post-images with a collision-resistant safe path", async () => {
+    const publicUrl = "https://cdn.test/post-images/2026/07/id.webp?token=Exact%20Value";
     mocks.upload.mockResolvedValue({ error: null });
     mocks.getPublicUrl.mockReturnValue({
-      data: { publicUrl: "https://cdn.test/post-images/2026/07/id.webp" },
+      data: { publicUrl },
     });
 
     const result = await uploadPostImage(
@@ -62,6 +63,20 @@ describe("post images", () => {
       expect.any(File),
       expect.objectContaining({ contentType: "image/webp", upsert: false }),
     );
-    expect(result.url).toMatch(/^https:\/\//);
+    expect(result.url).toBe(publicUrl);
+  });
+
+  it.each([
+    "http://cdn.test/post-images/id.webp",
+    "data:image/webp;base64,aW1hZ2U=",
+    "not a valid URL",
+    "",
+  ])("rejects an invalid public upload URL: %s", async (publicUrl) => {
+    mocks.upload.mockResolvedValue({ error: null });
+    mocks.getPublicUrl.mockReturnValue({ data: { publicUrl } });
+
+    await expect(
+      uploadPostImage(new File(["image"], "image.webp", { type: "image/webp" })),
+    ).rejects.toThrow("Image upload failed.");
   });
 });

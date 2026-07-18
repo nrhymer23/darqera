@@ -27,14 +27,20 @@ export function ImageUploadDialog({
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const dialog = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    const returnFocus = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
     setFile(null);
     setAlt("");
     setError("");
     setUploading(false);
     if (fileInput.current) fileInput.current.value = "";
+    fileInput.current?.focus();
+    return () => returnFocus?.focus();
   }, [open]);
 
   if (!open) return null;
@@ -85,12 +91,39 @@ export function ImageUploadDialog({
     }
   };
 
+  const handleDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      if (!uploading) onClose();
+      return;
+    }
+    if (event.key !== "Tab") return;
+
+    const focusable = Array.from(
+      dialog.current?.querySelectorAll<HTMLElement>(
+        'input:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    );
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   return (
     <div
+      ref={dialog}
       className="admin-rich-editor__image-dialog"
       role="dialog"
       aria-modal="true"
       aria-labelledby="image-upload-title"
+      onKeyDown={handleDialogKeyDown}
     >
       <form onSubmit={submit}>
         <h2 id="image-upload-title">Insert image</h2>
