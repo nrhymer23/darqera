@@ -37,7 +37,7 @@ describe("ImageUploadDialog", () => {
       new Response(
         JSON.stringify({
           image: {
-            url: "https://cdn.test/image.webp",
+            url: "https://cdn.test",
             path: "2026/07/id.webp",
           },
         }),
@@ -64,7 +64,7 @@ describe("ImageUploadDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Upload and insert" }));
     await waitFor(() =>
       expect(onInsert).toHaveBeenCalledWith({
-        src: "https://cdn.test/image.webp",
+        src: "https://cdn.test",
         alt: "A quantum processor",
       }),
     );

@@ -76,7 +76,7 @@ export function ImageUploadDialog({
         return;
       }
 
-      onInsert({ src: imageUrl.href, alt: description });
+      onInsert({ src: result.image.url, alt: description });
       reset();
     } catch {
       setError(defaultUploadError);
