@@ -1,6 +1,7 @@
 import { type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { checkAdminAuth, unauthorized } from "@/lib/adminAuth";
+import { sanitizePostHtml } from "@/lib/postHtml";
 
 /**
  * GET /api/admin/posts — list all posts (including drafts)
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     slug: finalSlug,
     pillar,
     excerpt: excerpt || "",
-    body: postBody || "",
+    body: sanitizePostHtml(typeof postBody === "string" ? postBody : ""),
     status: status || "draft",
     tags: tags || [],
   }).select().single();
@@ -86,7 +87,9 @@ export async function PATCH(request: NextRequest) {
   if (slug !== undefined) updates.slug = slug;
   if (pillar !== undefined) updates.pillar = pillar;
   if (excerpt !== undefined) updates.excerpt = excerpt;
-  if (postBody !== undefined) updates.body = postBody;
+  if (postBody !== undefined) {
+    updates.body = sanitizePostHtml(typeof postBody === "string" ? postBody : "");
+  }
   if (tags !== undefined) updates.tags = tags;
 
   if (status !== undefined) {

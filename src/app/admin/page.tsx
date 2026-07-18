@@ -4,6 +4,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import type { Post, Pillar } from "@/types/post";
 import { PILLAR_META } from "@/types/post";
 import { ResearchQueue } from "@/components/admin/ResearchQueue";
+import { PostEditorForm } from "@/components/admin/PostEditorForm";
 
 type Tab = "research" | "posts" | "create" | "metrics";
 
@@ -580,219 +581,29 @@ export default function AdminPage() {
 
       {/* ──── Create / Edit Post Form ──── */}
       {tab === "create" && (
-        <form onSubmit={handleSave} className="flex flex-col gap-5">
-          {/* Title */}
-          <div>
-            <label
-              htmlFor="admin-title"
-              className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Title
-            </label>
-            <input
-              id="admin-title"
-              type="text"
-              required
-              value={title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-              className="w-full px-4 py-2.5 text-sm rounded-[0.125rem] outline-none"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-ghost)",
-              }}
-            />
-          </div>
-
-          {/* Slug */}
-          <div>
-            <label
-              htmlFor="admin-slug"
-              className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Slug
-            </label>
-            <input
-              id="admin-slug"
-              type="text"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              placeholder="auto-generated from title"
-              className="w-full px-4 py-2.5 text-sm rounded-[0.125rem] outline-none placeholder:opacity-40"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-ghost)",
-              }}
-            />
-          </div>
-
-          {/* Pillar + Status row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="admin-pillar"
-                className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Pillar
-              </label>
-              <select
-                id="admin-pillar"
-                value={pillar}
-                onChange={(e) => setPillar(e.target.value as Pillar)}
-                className="w-full px-4 py-2.5 text-sm rounded-[0.125rem] outline-none"
-                style={{
-                  backgroundColor: "var(--bg-card)",
-                  color: "var(--text-primary)",
-                  border: "1px solid var(--border-ghost)",
-                }}
-              >
-                {(Object.keys(PILLAR_META) as Pillar[]).map((p) => (
-                  <option key={p} value={p}>
-                    {p} — {PILLAR_META[p].full}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="admin-status"
-                className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Status
-              </label>
-              <select
-                id="admin-status"
-                value={status}
-                onChange={(e) =>
-                  setStatus(e.target.value as "draft" | "published")
-                }
-                className="w-full px-4 py-2.5 text-sm rounded-[0.125rem] outline-none"
-                style={{
-                  backgroundColor: "var(--bg-card)",
-                  color: "var(--text-primary)",
-                  border: "1px solid var(--border-ghost)",
-                }}
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Excerpt */}
-          <div>
-            <label
-              htmlFor="admin-excerpt"
-              className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Excerpt
-            </label>
-            <textarea
-              id="admin-excerpt"
-              rows={2}
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="One sentence summary"
-              className="w-full px-4 py-2.5 text-sm rounded-[0.125rem] outline-none resize-y placeholder:opacity-40"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-ghost)",
-              }}
-            />
-          </div>
-
-          {/* Body */}
-          <div>
-            <label
-              htmlFor="admin-body"
-              className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Body
-            </label>
-            <textarea
-              id="admin-body"
-              rows={12}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Full post content (HTML supported)"
-              className="w-full px-4 py-2.5 text-sm leading-relaxed rounded-[0.125rem] outline-none resize-y placeholder:opacity-40 font-mono"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-ghost)",
-              }}
-            />
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label
-              htmlFor="admin-tags"
-              className="block text-[10px] font-semibold tracking-widest uppercase mb-2"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Tags (comma-separated)
-            </label>
-            <input
-              id="admin-tags"
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="ai, llm, infrastructure"
-              className="w-full px-4 py-2.5 text-sm rounded-[0.125rem] outline-none placeholder:opacity-40"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-ghost)",
-              }}
-            />
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            id="admin-create-submit"
-            className="btn-glow w-full py-3 text-sm font-semibold tracking-wide rounded-[0.125rem] transition-all"
-            style={{
-              backgroundColor: "#00f0ff",
-              color: "#0e0e0e",
-              opacity: loading ? 0.6 : 1,
-            }}
-          >
-            {loading
-              ? "Saving..."
-              : editingId
-              ? "Save Changes"
-              : "Create Post"}
-          </button>
-
-          {editingId && (
-            <button
-              type="button"
-              onClick={() => {
-                resetForm();
-                setTab("posts");
-              }}
-              className="w-full py-2.5 text-sm tracking-wide rounded-[0.125rem] transition-opacity hover:opacity-70"
-              style={{
-                color: "var(--text-muted)",
-                border: "1px solid var(--border-ghost)",
-              }}
-            >
-              Cancel Edit
-            </button>
-          )}
-        </form>
+        <PostEditorForm
+          title={title}
+          setTitle={setTitle}
+          handleTitleChange={handleTitleChange}
+          slug={slug}
+          setSlug={setSlug}
+          pillar={pillar}
+          setPillar={setPillar}
+          excerpt={excerpt}
+          setExcerpt={setExcerpt}
+          body={body}
+          setBody={setBody}
+          status={status}
+          setStatus={setStatus}
+          tags={tags}
+          setTags={setTags}
+          adminKey={adminKey}
+          loading={loading}
+          editingId={editingId}
+          handleSave={handleSave}
+          resetForm={resetForm}
+          showPosts={() => setTab("posts")}
+        />
       )}
     </div>
   );
