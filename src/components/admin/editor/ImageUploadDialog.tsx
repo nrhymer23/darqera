@@ -70,7 +70,13 @@ export function ImageUploadDialog({
         return;
       }
 
-      onInsert({ src: result.image.url, alt: description });
+      const imageUrl = new URL(result.image.url);
+      if (imageUrl.protocol !== "https:") {
+        setError(defaultUploadError);
+        return;
+      }
+
+      onInsert({ src: imageUrl.href, alt: description });
       reset();
     } catch {
       setError(defaultUploadError);

@@ -109,4 +109,41 @@ describe("ImageUploadDialog", () => {
       "A quantum processor",
     );
   });
+
+  it.each([
+    "http://cdn.test/image.webp",
+    "data:image/webp;base64,aW1hZ2U=",
+    "not a valid URL",
+  ])("rejects an unsafe returned URL: %s", async (url) => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ image: { url } }), { status: 201 }),
+    );
+    const onInsert = vi.fn();
+    render(
+      <ImageUploadDialog
+        open
+        adminKey="key"
+        onClose={vi.fn()}
+        onInsert={onInsert}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Image file"), {
+      target: {
+        files: [new File(["image"], "image.webp", { type: "image/webp" })],
+      },
+    });
+    fireEvent.change(screen.getByLabelText("Alt text"), {
+      target: { value: "A quantum processor" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload and insert" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Image upload failed. Please try again.",
+    );
+    expect(onInsert).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Upload and insert" }),
+    ).toBeEnabled();
+  });
 });

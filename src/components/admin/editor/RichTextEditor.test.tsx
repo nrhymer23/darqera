@@ -166,4 +166,35 @@ describe("RichTextEditor", () => {
       ),
     );
   });
+
+  it.each([
+    "http://cdn.test/image.webp",
+    "data:image/webp;base64,aW1hZ2U=",
+    "not a valid URL",
+  ])("does not insert an unsafe uploaded image URL: %s", async (url) => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ image: { url } }), { status: 201 }),
+    );
+    const onChange = vi.fn();
+    render(
+      <RichTextEditor value="<p>Body</p>" onChange={onChange} adminKey="key" />,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Insert image" }));
+    fireEvent.change(screen.getByLabelText("Image file"), {
+      target: {
+        files: [new File(["image"], "image.webp", { type: "image/webp" })],
+      },
+    });
+    fireEvent.change(screen.getByLabelText("Alt text"), {
+      target: { value: "A quantum processor" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload and insert" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Image upload failed. Please try again.",
+    );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
