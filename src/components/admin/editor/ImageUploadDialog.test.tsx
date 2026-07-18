@@ -16,6 +16,22 @@ afterEach(() => {
 });
 
 describe("ImageUploadDialog", () => {
+  it("exposes a modal dialog with an accessible title", () => {
+    render(
+      <ImageUploadDialog
+        open
+        adminKey="key"
+        onClose={vi.fn()}
+        onInsert={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("dialog", { name: "Insert image" })).toHaveAttribute(
+      "aria-modal",
+      "true",
+    );
+  });
+
   it("requires both an image and alt text", async () => {
     render(
       <ImageUploadDialog
@@ -71,6 +87,31 @@ describe("ImageUploadDialog", () => {
     expect(vi.mocked(fetch).mock.calls[0][1]?.headers).toMatchObject({
       "x-admin-key": "key",
     });
+  });
+
+  it("exposes disabled upload controls while a request is pending", () => {
+    vi.mocked(fetch).mockReturnValue(new Promise(() => {}));
+    render(
+      <ImageUploadDialog
+        open
+        adminKey="key"
+        onClose={vi.fn()}
+        onInsert={vi.fn()}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Image file"), {
+      target: {
+        files: [new File(["image"], "image.webp", { type: "image/webp" })],
+      },
+    });
+    fireEvent.change(screen.getByLabelText("Alt text"), {
+      target: { value: "A quantum processor" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload and insert" }));
+
+    expect(screen.getByRole("button", { name: "Uploading…" })).toBeDisabled();
+    expect(screen.getByLabelText("Image file")).toBeDisabled();
+    expect(screen.getByLabelText("Alt text")).toBeDisabled();
   });
 
   it("keeps the dialog open with a safe error and enables retry after failure", async () => {

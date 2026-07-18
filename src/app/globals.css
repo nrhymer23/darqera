@@ -285,3 +285,215 @@ a, button, [role="button"] {
 .btn-glow:hover {
   box-shadow: 0 0 24px rgba(0, 240, 255, 0.3);
 }
+
+/* Admin post editor — a quiet writing sheet with a signal-line focus marker. */
+.admin-rich-editor {
+  position: relative;
+  overflow: visible;
+  background: var(--bg-card);
+  border: 1px solid var(--border-ghost);
+  color: var(--text-primary);
+}
+
+.admin-rich-editor::before {
+  position: absolute;
+  z-index: 3;
+  inset: -1px auto -1px -1px;
+  width: 2px;
+  background: var(--brand-cyan);
+  content: "";
+  opacity: 0;
+}
+
+.admin-rich-editor:focus-within::before { opacity: 1; }
+
+.admin-rich-editor__toolbar {
+  position: sticky;
+  z-index: 4;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: end;
+  padding: 0.65rem clamp(0.65rem, 2vw, 1rem);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-ghost);
+}
+
+.admin-rich-editor__toolbar label {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-rich-editor__toolbar :where(button, select),
+.admin-rich-editor__link-popover input {
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-ghost);
+  border-radius: 2px;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.admin-rich-editor__toolbar button:hover:not(:disabled) {
+  border-color: var(--brand-cyan);
+  color: var(--text-primary);
+}
+
+.admin-rich-editor__toolbar button[aria-pressed="true"] {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-card);
+}
+
+.admin-rich-editor__toolbar :where(button, select):disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+  opacity: 0.45;
+}
+
+.admin-rich-editor__content,
+.admin-rich-editor__source textarea {
+  min-height: 28rem;
+  width: 100%;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+.admin-rich-editor__content {
+  padding: clamp(1.25rem, 4vw, 3rem) clamp(1rem, 6vw, 4.5rem);
+  font-size: 1.0625rem;
+  line-height: 1.72;
+  letter-spacing: -0.005em;
+  outline: none;
+}
+
+.admin-rich-editor__content > .ProseMirror { min-height: inherit; outline: none; }
+.admin-rich-editor__content .ProseMirror > * + * { margin-top: 1rem; }
+.admin-rich-editor__content .ProseMirror p { margin-block: 0 1.15rem; }
+.admin-rich-editor__content .ProseMirror h1,
+.admin-rich-editor__content .ProseMirror h2,
+.admin-rich-editor__content .ProseMirror h3 {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.admin-rich-editor__content .ProseMirror h1 { margin-top: 2.5rem; font-size: clamp(1.8rem, 4vw, 2.4rem); }
+.admin-rich-editor__content .ProseMirror h2 { margin-top: 2.25rem; font-size: clamp(1.45rem, 3vw, 1.8rem); }
+.admin-rich-editor__content .ProseMirror h3 { margin-top: 1.75rem; font-size: 1.25rem; }
+.admin-rich-editor__content .ProseMirror :where(ul, ol) { padding-left: 1.5rem; }
+.admin-rich-editor__content .ProseMirror li + li { margin-top: 0.4rem; }
+.admin-rich-editor__content .ProseMirror blockquote {
+  margin-block: 1.75rem;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--brand-cyan);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.admin-rich-editor__content .ProseMirror a {
+  color: var(--brand-cyan);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.admin-rich-editor__content .ProseMirror img { max-width: 100%; height: auto; }
+.admin-rich-editor__content .ProseMirror .ProseMirror-selectednode {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 3px;
+}
+
+.admin-rich-editor__source {
+  display: grid;
+  gap: 0.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  color: var(--text-muted);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-rich-editor__source textarea {
+  resize: vertical;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--border-ghost);
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  text-transform: none;
+}
+
+.admin-rich-editor__link-popover {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: end;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-ghost);
+}
+.admin-rich-editor__link-popover label { flex: 1 1 15rem; }
+.admin-rich-editor__link-popover input { width: 100%; }
+.admin-rich-editor__link-popover [role="alert"] { flex-basis: 100%; color: var(--text-primary); }
+
+.admin-rich-editor__image-dialog {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: color-mix(in srgb, var(--bg-secondary) 82%, transparent);
+}
+
+.admin-rich-editor__image-dialog form {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 32rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  background: var(--bg-card);
+  border: 1px solid var(--border-ghost);
+  color: var(--text-primary);
+}
+
+.admin-rich-editor__image-dialog h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+.admin-rich-editor__image-dialog label { display: grid; gap: 0.4rem; color: var(--text-secondary); font-size: 0.8rem; }
+.admin-rich-editor__image-dialog input {
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-ghost);
+  color: var(--text-primary);
+}
+.admin-rich-editor__image-dialog button {
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-ghost);
+  color: var(--text-primary);
+}
+.admin-rich-editor__image-dialog button[type="submit"] { border-color: var(--brand-cyan); }
+.admin-rich-editor__image-dialog :disabled { cursor: not-allowed; color: var(--text-muted); opacity: 0.5; }
+.admin-rich-editor__image-dialog [role="alert"] { color: var(--text-secondary); font-size: 0.8rem; }
+
+@media (max-width: 640px) {
+  .admin-rich-editor__toolbar { position: sticky; top: 0; gap: 0.3rem; }
+  .admin-rich-editor__toolbar :where(button, select) { min-height: 2.25rem; }
+  .admin-rich-editor__content { padding-inline: 1rem; }
+  .admin-rich-editor__image-dialog { place-items: end center; padding: 0.75rem; }
+  .admin-rich-editor__image-dialog form { width: 100%; max-height: calc(100dvh - 1.5rem); }
+}

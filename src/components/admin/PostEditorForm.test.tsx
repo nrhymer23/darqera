@@ -41,7 +41,6 @@ describe("PostEditorForm", () => {
       return (
         <PostEditorForm
           title="Title"
-          setTitle={vi.fn()}
           handleTitleChange={vi.fn()}
           slug="title"
           setSlug={vi.fn()}
@@ -67,6 +66,7 @@ describe("PostEditorForm", () => {
 
     render(<Harness />);
 
+    expect(screen.getByText("Body")).toHaveAttribute("for", "admin-post-body");
     expect(screen.getByRole("textbox", { name: "Post body" })).toHaveValue(
       "<p>Existing body</p>",
     );

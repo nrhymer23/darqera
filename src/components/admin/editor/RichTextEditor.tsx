@@ -76,6 +76,7 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
         <label className="admin-rich-editor__source">
           Post body HTML
           <textarea
+            id="admin-post-body"
             aria-label="Post body HTML"
             value={sourceValue}
             onChange={(event) => setSourceValue(event.target.value)}
@@ -84,6 +85,7 @@ export function RichTextEditor({ value, onChange, adminKey }: RichTextEditorProp
       ) : (
         <EditorContent
           editor={editor}
+          id="admin-post-body"
           role="textbox"
           aria-label="Post body"
           className="admin-rich-editor__content"

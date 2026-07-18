@@ -62,7 +62,11 @@ export function EditorToolbar({
   );
 
   return (
-    <div className="admin-rich-editor__toolbar" aria-label="Text formatting">
+    <div
+      className="admin-rich-editor__toolbar"
+      role="toolbar"
+      aria-label="Text formatting"
+    >
       <label>
         Block style
         <select

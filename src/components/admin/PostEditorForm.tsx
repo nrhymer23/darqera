@@ -9,7 +9,6 @@ type PostStatus = "draft" | "published";
 
 type PostEditorFormProps = {
   title: string;
-  setTitle: Dispatch<SetStateAction<string>>;
   handleTitleChange(value: string): void;
   slug: string;
   setSlug: Dispatch<SetStateAction<string>>;
@@ -100,7 +99,7 @@ export function PostEditorForm({
       </div>
 
       <div>
-        <label className="block text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
+        <label htmlFor="admin-post-body" className="block text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
           Body
         </label>
         <RichTextEditor value={body} onChange={setBody} adminKey={adminKey} />

@@ -63,6 +63,22 @@ describe("RichTextEditor", () => {
     expect(screen.getByRole("option", { name: "Heading 1" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Heading 2" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Heading 3" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bold" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
+  });
+
+  it("associates the visible body label with the editable surface", async () => {
+    render(
+      <RichTextEditor value="<p>Body</p>" onChange={vi.fn()} adminKey="key" />,
+    );
+
+    expect(await screen.findByRole("textbox", { name: "Post body" })).toHaveAttribute(
+      "id",
+      "admin-post-body",
+    );
   });
 
   it("preserves editor content and selection for equivalent parent HTML", async () => {

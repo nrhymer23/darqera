@@ -36,6 +36,16 @@ describe("post images", () => {
     ).toThrow("10 MB");
   });
 
+  it("accepts an image at exactly the 10 MB limit", () => {
+    expect(() =>
+      validatePostImage(
+        new File([new Uint8Array(10 * 1024 * 1024)], "limit.png", {
+          type: "image/png",
+        }),
+      ),
+    ).not.toThrow();
+  });
+
   it("uploads to post-images with a collision-resistant safe path", async () => {
     mocks.upload.mockResolvedValue({ error: null });
     mocks.getPublicUrl.mockReturnValue({

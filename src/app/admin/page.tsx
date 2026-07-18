@@ -583,7 +583,6 @@ export default function AdminPage() {
       {tab === "create" && (
         <PostEditorForm
           title={title}
-          setTitle={setTitle}
           handleTitleChange={handleTitleChange}
           slug={slug}
           setSlug={setSlug}
