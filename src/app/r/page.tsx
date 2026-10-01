@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Reality — DARQ Era",
     description:
-      "Signal-driven coverage of XR, AR, VR, and the intersection of digital and physical reality.",
+      "Real-time coverage of XR, AR, VR, and the intersection of digital and physical reality.",
     url: "https://darqera.com/r",
   },
 };
@@ -49,7 +49,7 @@ export default async function RealityPage() {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No signals yet on this frequency.
+            No posts here yet. Check back soon.
           </p>
         </div>
       ) : (

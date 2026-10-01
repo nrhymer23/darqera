@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Database unavailable" }, { status: 503 });
 
   const body = await request.json();
-  const { title, slug, pillar, excerpt, body: postBody, status, tags } = body;
+  const { title, slug, pillar, excerpt, body: postBody, status, tags, cover_image, cover_alt } = body;
 
   // Validate required fields
   if (!title || !pillar) {
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     body: sanitizePostHtml(typeof postBody === "string" ? postBody : ""),
     status: status || "draft",
     tags: tags || [],
+    ...(cover_image ? { cover_image, cover_alt: cover_alt || "" } : {}),
   }).select().single();
 
   if (error)
@@ -76,7 +77,7 @@ export async function PATCH(request: NextRequest) {
     return Response.json({ error: "Database unavailable" }, { status: 503 });
 
   const body = await request.json();
-  const { id, title, slug, pillar, excerpt, body: postBody, status, tags } = body;
+  const { id, title, slug, pillar, excerpt, body: postBody, status, tags, cover_image, cover_alt } = body;
 
   if (!id) {
     return Response.json({ error: "Post ID is required" }, { status: 400 });
@@ -91,6 +92,10 @@ export async function PATCH(request: NextRequest) {
     updates.body = sanitizePostHtml(typeof postBody === "string" ? postBody : "");
   }
   if (tags !== undefined) updates.tags = tags;
+  if (cover_image !== undefined) {
+    updates.cover_image = cover_image || null;
+    updates.cover_alt = cover_image ? cover_alt || "" : null;
+  }
 
   if (status !== undefined) {
     updates.status = status;

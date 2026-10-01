@@ -47,11 +47,10 @@ export default function AboutPage() {
           a builder&apos;s perspective — not academic, not hype.
         </p>
         <p>
-          Every post starts as a signal: a topic validated across multiple
-          independent sources by our signal pipeline, then researched and
-          written in one voice. The three-bar Signal Strength on each post
-          marks where the shift sits on the adoption curve — early, emerging,
-          or already here.
+          Every post starts with a story confirmed across multiple independent
+          sources, then researched and written in one voice. The three bars on
+          each post mark where the shift sits on the adoption curve — early,
+          emerging, or already here.
         </p>
       </div>
 
@@ -105,7 +104,7 @@ export default function AboutPage() {
       >
         DARQ Era is built by Noel Rhymer — site reliability engineer by day,
         builder of AI tools and pipelines the rest of the time. This site is
-        itself a build log: the signal pipeline that feeds it is part of the
+        itself a build log: the research pipeline that feeds it is part of the
         story.
       </p>
 

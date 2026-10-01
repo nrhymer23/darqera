@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Quantum — DARQ Era",
     description:
-      "Signal-driven coverage of quantum computing, cryptography, and post-classical computing.",
+      "Real-time coverage of quantum computing, cryptography, and post-classical computing.",
     url: "https://darqera.com/q",
   },
 };
@@ -49,7 +49,7 @@ export default async function QuantumPage() {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No signals yet on this frequency.
+            No posts here yet. Check back soon.
           </p>
         </div>
       ) : (

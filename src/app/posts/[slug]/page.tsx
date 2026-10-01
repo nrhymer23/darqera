@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import RelatedPosts from "@/components/RelatedPosts";
 import NewsletterCapture from "@/components/NewsletterCapture";
 import ViewCounter from "@/components/ViewCounter";
+import PostCover from "@/components/PostCover";
 import SignalStrength from "@/components/SignalStrength";
 import { postSignalLevel } from "@/lib/signal";
 import { wrapWhyItMatters } from "@/lib/postBody";
@@ -38,11 +39,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.published_at,
       tags: post.tags,
       section: pillar.full,
+      ...(post.cover_image ? { images: [{ url: post.cover_image, alt: post.cover_alt || post.title }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
+      ...(post.cover_image ? { images: [post.cover_image] } : {}),
     },
   };
 }
@@ -125,6 +128,15 @@ export default async function PostPage({ params }: Props) {
           style={{ backgroundColor: pillarVar }}
         />
       </header>
+
+      {/* Cover image */}
+      {post.cover_image && (
+        <figure className="-mt-2 mb-10 sm:-mx-8">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-xl">
+            <PostCover post={post} sizes="(min-width: 896px) 832px, 100vw" priority />
+          </div>
+        </figure>
+      )}
 
       {/* Body */}
       <article>

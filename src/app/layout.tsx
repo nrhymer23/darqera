@@ -19,16 +19,16 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "DARQ Era — Signal-Driven Tech Intelligence",
+    default: "DARQ Era — Tech News & Analysis",
     template: "%s | DARQ Era",
   },
   description:
-    "Signal-driven coverage of Decentralization, AI, Reality, and Quantum Computing — written from a builder's perspective.",
+    "Real-time coverage of Decentralization, AI, Reality, and Quantum Computing — written from a builder's perspective.",
   metadataBase: new URL("https://darqera.com"),
   openGraph: {
-    title: "DARQ Era — Signal-Driven Tech Intelligence",
+    title: "DARQ Era — Tech News & Analysis",
     description:
-      "Signal-driven coverage of Decentralization, AI, Reality, and Quantum Computing.",
+      "Real-time coverage of Decentralization, AI, Reality, and Quantum Computing.",
     url: "https://darqera.com",
     siteName: "DARQ Era",
     locale: "en_US",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "DARQ Era",
     description:
-      "Signal-driven coverage of Decentralization, AI, Reality, and Quantum Computing.",
+      "Real-time coverage of Decentralization, AI, Reality, and Quantum Computing.",
   },
   robots: {
     index: true,
@@ -90,7 +90,7 @@ export default function RootLayout({
               borderTop: "1px solid var(--border-ghost)",
             }}
           >
-            © {new Date().getFullYear()} DARQ Era. Signal-driven intelligence.
+            © {new Date().getFullYear()} DARQ Era. Tech news and analysis.
           </footer>
         </ThemeProvider>
         <Analytics />

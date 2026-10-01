@@ -17,7 +17,7 @@ export default function SignalStrength({
   return (
     <span
       role="img"
-      aria-label={`Signal strength: ${n} of 3`}
+      aria-label={`Adoption stage: ${n} of 3`}
       style={{
         display: "inline-flex",
         flexDirection: "column-reverse",

@@ -7,7 +7,7 @@ export default function NotFound() {
         className="text-[11px] font-semibold tracking-[0.18em] uppercase mb-4"
         style={{ color: "var(--brand-cyan)" }}
       >
-        Signal lost
+        Page not found
       </p>
       <h1
         className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(2.5rem,7vw,4rem)] leading-none tracking-[-0.025em] mb-5"

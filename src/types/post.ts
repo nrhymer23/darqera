@@ -13,6 +13,9 @@ export interface Post {
   view_count?: number;
   /** Adoption-curve stage set by the signal pipeline: 1 early, 2 emerging, 3 shifting. */
   signal_strength?: number | null;
+  /** Optional cover image URL; null falls back to generative pillar art. */
+  cover_image?: string | null;
+  cover_alt?: string | null;
 }
 
 export const PILLAR_META: Record<

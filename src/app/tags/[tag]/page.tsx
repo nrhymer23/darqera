@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `DARQ Era tech editorial posts for ${tag}.`,
     openGraph: {
       title: `Posts tagged "${tag}" — DARQ Era`,
-      description: `Signal-driven coverage tagged with ${tag}.`,
+      description: `Coverage tagged with ${tag}.`,
       url: `https://darqera.com/tags/${tag}`,
     },
   };
@@ -54,7 +54,7 @@ export default async function TagPage({ params }: Props) {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No signals tagged here yet.
+            No posts with this tag yet.
           </p>
         </div>
       ) : (

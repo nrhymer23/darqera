@@ -24,7 +24,7 @@ export default async function ArchivePage() {
         className="font-[family-name:var(--font-space-grotesk)] font-bold text-[clamp(2rem,5vw,3rem)] leading-[1.1] tracking-[-0.025em] mb-2"
         style={{ color: "var(--text-primary)" }}
       >
-        Every signal, on record.
+        Everything we&apos;ve published.
       </h1>
       <p className="text-sm mb-8" style={{ color: "var(--text-muted)" }}>
         {posts.length} {posts.length === 1 ? "post" : "posts"} · newest first
@@ -36,7 +36,7 @@ export default async function ArchivePage() {
             className="text-sm tracking-wide"
             style={{ color: "var(--text-muted)" }}
           >
-            Signal incoming. First posts dropping soon.
+            First posts dropping soon.
           </p>
         </div>
       ) : (

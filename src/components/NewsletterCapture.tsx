@@ -65,7 +65,7 @@ export default function NewsletterCapture() {
           className="text-[10px] font-semibold tracking-widest uppercase mb-3"
           style={{ color: "#00f0ff" }}
         >
-          Stay in the signal
+          Stay current
         </p>
         <h3
           className="font-[family-name:var(--font-space-grotesk)] font-bold text-xl mb-2"
@@ -77,8 +77,8 @@ export default function NewsletterCapture() {
           className="text-sm leading-relaxed mb-6"
           style={{ color: "var(--text-secondary)" }}
         >
-          No spam. Just signal — the sharpest takes on Decentralization, AI,
-          Reality, and Quantum, delivered when it matters.
+          No spam. Just the news that matters and the sharpest takes on
+          Decentralization, AI, Reality, and Quantum, delivered when it counts.
         </p>
 
         {status === "success" ? (
@@ -105,7 +105,7 @@ export default function NewsletterCapture() {
               />
             </svg>
             <span className="text-sm font-medium tracking-wide">
-              You&apos;re in. First signal incoming.
+              You&apos;re in. First issue incoming.
             </span>
           </div>
         ) : (

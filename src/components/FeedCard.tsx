@@ -4,11 +4,11 @@ import { PILLAR_META } from "@/types/post";
 import { getReadingTime } from "@/lib/readingTime";
 import SignalStrength from "@/components/SignalStrength";
 import { postSignalLevel } from "@/lib/signal";
-import PillarCanvas from "@/components/PillarCanvas";
+import PostCover from "@/components/PostCover";
 
 interface FeedCardProps {
   post: Post;
-  /** Large hero-style card for the newest signal. */
+  /** Large hero-style card for the newest post. */
   featured?: boolean;
 }
 
@@ -40,7 +40,11 @@ export default function FeedCard({ post, featured = false }: FeedCardProps) {
         className="feed-card__cover"
         style={{ ["--pillar" as string]: pillarVar }}
       >
-        <PillarCanvas pillar={post.pillar} />
+        <PostCover
+          post={post}
+          sizes={featured ? "(min-width: 1152px) 560px, 100vw" : "(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"}
+          priority={featured}
+        />
       </div>
 
       <div className="feed-card__body">
@@ -92,7 +96,7 @@ export default function FeedCard({ post, featured = false }: FeedCardProps) {
               className="ml-auto text-[13px] font-semibold hidden sm:inline"
               style={{ color: "var(--brand-cyan)" }}
             >
-              Read the signal →
+              Read more →
             </span>
           )}
         </div>

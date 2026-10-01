@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Decentralized — DARQ Era",
     description:
-      "Signal-driven coverage of decentralized networks, protocols, DeFi, and DAOs.",
+      "Real-time coverage of decentralized networks, protocols, DeFi, and DAOs.",
     url: "https://darqera.com/d",
   },
 };
@@ -49,7 +49,7 @@ export default async function DecentralizedPage() {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No signals yet on this frequency.
+            No posts here yet. Check back soon.
           </p>
         </div>
       ) : (

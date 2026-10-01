@@ -252,7 +252,7 @@ a, button, [role="button"] {
   overflow-x: auto;
   font-size: 13px;
 }
-.post-body img { border-radius: 8px; max-width: 100%; height: auto; }
+.post-body img { border-radius: 10px; max-width: 100%; height: auto; margin: 2rem auto; display: block; }
 
 /* "Why it matters" signature block */
 .why-it-matters {

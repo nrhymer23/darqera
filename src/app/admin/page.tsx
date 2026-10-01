@@ -35,6 +35,9 @@ export default function AdminPage() {
   const [body, setBody] = useState("");
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [tags, setTags] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+  const [coverAlt, setCoverAlt] = useState("");
+  const [hadCover, setHadCover] = useState(false);
 
   // Delete confirmation
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -122,6 +125,9 @@ export default function AdminPage() {
     setExcerpt("");
     setBody("");
     setTags("");
+    setCoverImage("");
+    setCoverAlt("");
+    setHadCover(false);
     setStatus("draft");
     setEditingId(null);
   }
@@ -135,6 +141,9 @@ export default function AdminPage() {
     setBody(post.body || "");
     setStatus(post.status);
     setTags((post.tags || []).join(", "));
+    setCoverImage(post.cover_image || "");
+    setCoverAlt(post.cover_alt || "");
+    setHadCover(Boolean(post.cover_image));
     setError("");
     setSuccess("");
     setTab("create");
@@ -164,6 +173,10 @@ export default function AdminPage() {
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean),
+          // Only touch cover columns when a cover is set or being cleared.
+          ...(coverImage || hadCover
+            ? { cover_image: coverImage, cover_alt: coverAlt }
+            : {}),
         }),
       });
 
@@ -596,6 +609,10 @@ export default function AdminPage() {
           setStatus={setStatus}
           tags={tags}
           setTags={setTags}
+          coverImage={coverImage}
+          setCoverImage={setCoverImage}
+          coverAlt={coverAlt}
+          setCoverAlt={setCoverAlt}
           adminKey={adminKey}
           loading={loading}
           editingId={editingId}

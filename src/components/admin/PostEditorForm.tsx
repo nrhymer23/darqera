@@ -2,6 +2,7 @@
 
 import type { Dispatch, FormEventHandler, SetStateAction } from "react";
 
+import { CoverImageField } from "@/components/admin/CoverImageField";
 import { RichTextEditor } from "@/components/admin/editor/RichTextEditor";
 import { PILLAR_META, type Pillar } from "@/types/post";
 
@@ -22,6 +23,10 @@ type PostEditorFormProps = {
   setStatus: Dispatch<SetStateAction<PostStatus>>;
   tags: string;
   setTags: Dispatch<SetStateAction<string>>;
+  coverImage?: string;
+  setCoverImage?: Dispatch<SetStateAction<string>>;
+  coverAlt?: string;
+  setCoverAlt?: Dispatch<SetStateAction<string>>;
   adminKey: string;
   loading: boolean;
   editingId: string | null;
@@ -45,6 +50,10 @@ export function PostEditorForm({
   setStatus,
   tags,
   setTags,
+  coverImage = "",
+  setCoverImage,
+  coverAlt = "",
+  setCoverAlt,
   adminKey,
   loading,
   editingId,
@@ -90,6 +99,16 @@ export function PostEditorForm({
           </select>
         </div>
       </div>
+
+      {setCoverImage && setCoverAlt && (
+        <CoverImageField
+          adminKey={adminKey}
+          image={coverImage}
+          alt={coverAlt}
+          onImage={setCoverImage}
+          onAlt={setCoverAlt}
+        />
+      )}
 
       <div>
         <label htmlFor="admin-excerpt" className="block text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>

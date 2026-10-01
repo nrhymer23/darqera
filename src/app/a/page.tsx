@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Artificial Intelligence — DARQ Era",
     description:
-      "Signal-driven coverage of autonomous systems, LLMs, AI infrastructure.",
+      "Real-time coverage of autonomous systems, LLMs, AI infrastructure.",
     url: "https://darqera.com/a",
   },
 };
@@ -49,7 +49,7 @@ export default async function AIPage() {
       {posts.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            No signals yet on this frequency.
+            No posts here yet. Check back soon.
           </p>
         </div>
       ) : (
