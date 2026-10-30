@@ -100,7 +100,7 @@ describe("RichTextEditor", () => {
     )?.get;
     expect(commandsGetter).toBeTypeOf("function");
     const setContent = vi.fn();
-    vi.spyOn(Editor.prototype, "commands", "get").mockImplementation(function () {
+    vi.spyOn(Editor.prototype, "commands", "get").mockImplementation(function (this: Editor) {
       const commands = commandsGetter!.call(this);
       return {
         ...commands,

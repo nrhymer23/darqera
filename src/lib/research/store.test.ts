@@ -10,6 +10,7 @@ import {
   listPackets,
   requestMoreResearch,
   startClusterResearch,
+  type ResearchDb,
 } from "./store";
 
 function chain(result: unknown) {
@@ -36,7 +37,7 @@ function clientWith(options: {
       return next;
     }),
     rpc: options.rpc ?? vi.fn(),
-  };
+  } as unknown as ResearchDb;
 }
 
 describe("listPackets", () => {
@@ -167,6 +168,7 @@ describe("packet mutations", () => {
       expectedVersion: 7,
       angle: "Approved angle",
       reviewerId: "noel",
+      actorId: "noel",
       origin: "darqera",
       idempotencyKey: "approve-1",
     }, client);
@@ -187,7 +189,7 @@ describe("packet mutations", () => {
     });
     const result = await approvePacket({
       packetId: "p1", expectedState: "awaiting_review", expectedVersion: 7,
-      angle: "Angle", reviewerId: "noel", origin: "darqera", idempotencyKey: "approve-1",
+      angle: "Angle", reviewerId: "noel", actorId: "noel", origin: "darqera", idempotencyKey: "approve-1",
     }, client);
     expect(client.rpc).not.toHaveBeenCalled();
     expect(result).toEqual({ ...stored, replayed: true });
