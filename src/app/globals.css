@@ -26,93 +26,75 @@
 
   /* Typography */
   --font-display: var(--font-space-grotesk);
-  --font-body:    var(--font-inter);
+  --font-body:    var(--font-geist);
 }
 
 /* ────────────────────────────────
    Theme Token System (CSS Variables)
    ──────────────────────────────── */
 
+/* A2 "Daybook" tokens (2026-11-27). Light = Sandstone-informed, dark = Darq default.
+   Legacy names (--bg-primary, --pillar-d, --brand-cyan…) alias the A2 tokens so
+   admin + older components keep working. */
 :root {
-  /* Light mode defaults */
-  --bg-primary:      #f5f3f0;
-  --bg-secondary:    #eae7e3;
-  --bg-card:         #ffffff;
-  --bg-card-hover:   #f9f8f6;
-  --bg-nav:          rgba(245, 243, 240, 0.82);
-  --bg-nav-border:   rgba(0, 0, 0, 0.06);
-
-  --text-primary:    #1a1a1a;
-  --text-secondary:  #555555;
-  --text-muted:      #888888;
-  --text-inverse:    #e5e2e1;
-
-  --border-ghost:    rgba(0, 0, 0, 0.08);
-  --signal-bar-opacity: 1;
-  --tag-bg-opacity:  0.10;
-
-  --shadow-card:     0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
-  --shadow-nav:      0 1px 8px rgba(0, 0, 0, 0.05);
-
-  /* Pillar accents — light-mode variants (>=4.5:1 on light surfaces) */
-  --pillar-d: #00897b;
-  --pillar-a: #1f9d57;
-  --pillar-r: #c81e63;
-  --pillar-q: #7c3aed;
-  --brand-cyan: #0a8aa0;
-  /* Atmosphere — light = soft neutral wash (no violet) */
-  --atmos-1: #f5f3f0;
-  --atmos-2: #efece7;
-  --atmos-3: #f5f3f0;
-
+  --bg:#F4F0E8; --surface:#EAE4D8; --surface-2:#E2DACB; --line:#D6CDBC;
+  --text:#1F1D19; --text-2:#3A362F; --muted:#6E6555;
+  --cyan:#006874; --cyan-hover:#00525C; --on-cyan:#FFFFFF; --link:#006874;
+  --d:#0A7259; --a:#4F6B00; --r:#C2185B; --q:#6440D0; --x:#006874; --on-pill:#FFFFFF;
+  --gold:#7A5C17; --gold-rule:#A8832A;
+  --grain:.07;
   color-scheme: light;
 }
-
 .dark {
-  --bg-primary:      #131313;
-  --bg-secondary:    #0e0e0e;
-  --bg-card:         #1c1b1b;
-  --bg-card-hover:   #222222;
-  --bg-nav:          rgba(19, 19, 19, 0.75);
-  --bg-nav-border:   rgba(59, 73, 75, 0.15);
-
-  --text-primary:    #e5e2e1;
-  --text-secondary:  #b0adab;
-  --text-muted:      #8a8a8a;
-  --text-inverse:    #1a1a1a;
-
-  --border-ghost:    rgba(59, 73, 75, 0.15);
-  --signal-bar-opacity: 1;
-  --tag-bg-opacity:  0.08;
-
-  --shadow-card:     none;
-  --shadow-nav:      none;
-
-  /* Pillar accents — re-saturated dark-mode set */
-  --pillar-d: #00e5c4;
-  --pillar-a: #39ff8c;
-  --pillar-r: #ff3d8a;
-  --pillar-q: #b366ff;
-  --brand-cyan: #00f0ff;
-  /* Atmosphere — deep indigo-violet */
-  --atmos-1: #0e0e0e;
-  --atmos-2: #12101f;
-  --atmos-3: #18142b;
-
+  --bg:#121314; --surface:#191B1D; --surface-2:#202326; --line:#2A2D30;
+  --text:#E8E5DF; --text-2:#C2BFB8; --muted:#8E8B85;
+  --cyan:#00E1EE; --cyan-hover:#5DEDF5; --on-cyan:#0C0F10; --link:#00E1EE;
+  --d:#3DD6A8; --a:#C4EE3A; --r:#FF5C93; --q:#A98BFF; --x:#00E1EE; --on-pill:#0C0F10;
+  --gold:#CDA652; --gold-rule:#CDA652;
+  --grain:.05;
   color-scheme: dark;
+}
+:root, .dark {
+  --ease: cubic-bezier(0.22, 1, 0.36, 1); --t-sm:200ms; --t-md:400ms; --t-lg:700ms;
+  --measure: 40rem;
+  --display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --serif: var(--font-newsreader), Georgia, serif;
+  --ui: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
+  --sig: var(--font-fraunces), Georgia, serif;
+
+  /* legacy aliases */
+  --bg-primary: var(--bg); --bg-secondary: var(--surface);
+  --bg-card: var(--surface); --bg-card-hover: var(--surface-2);
+  --bg-nav: var(--bg); --bg-nav-border: var(--line);
+  --text-primary: var(--text); --text-secondary: var(--text-2); --text-muted: var(--muted);
+  --text-inverse: var(--bg);
+  --border-ghost: var(--line);
+  --signal-bar-opacity: 1; --tag-bg-opacity: .10;
+  --shadow-card: none; --shadow-nav: none;
+  --pillar-d: var(--d); --pillar-a: var(--a); --pillar-r: var(--r); --pillar-q: var(--q);
+  --brand-cyan: var(--cyan);
+  --atmos-1: var(--bg); --atmos-2: var(--bg); --atmos-3: var(--bg);
 }
 
 /* ────────────────────────────────
    Base Styles
    ──────────────────────────────── */
 
+html { background: var(--bg); transition: background-color var(--t-md) var(--ease); }
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--ui);
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: color var(--t-md) var(--ease);
 }
+/* faint earth grain (Noel brand accent) */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 2px; }
 
 /* ────────────────────────────────
    Prose override
@@ -128,8 +110,8 @@ body {
 *::before,
 *::after {
   transition-property: background-color, border-color, color, box-shadow;
-  transition-duration: 0.2s;
-  transition-timing-function: ease;
+  transition-duration: var(--t-sm);
+  transition-timing-function: var(--ease);
 }
 
 /* Exclude elements where transitions cause jank */
@@ -595,4 +577,77 @@ a, button, [role="button"] {
   .admin-rich-editor__content { padding-inline: 1rem; }
   .admin-rich-editor__image-dialog { place-items: end center; padding: 0.75rem; }
   .admin-rich-editor__image-dialog form { width: 100%; max-height: calc(100dvh - 1.5rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ════════════════════════════════
+   A2 "Daybook" components
+   ════════════════════════════════ */
+.wrap-a2 { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.mono-label { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+
+/* buttons */
+.btn-cyan { display: inline-flex; align-items: center; justify-content: center; height: 38px; padding: 0 16px; border-radius: 4px;
+  font: 600 14px var(--ui); background: var(--cyan); color: var(--on-cyan); border: 0; cursor: pointer; white-space: nowrap; }
+.btn-cyan:hover { background: var(--cyan-hover); }
+
+/* nav */
+.site-nav { position: sticky; top: 0; z-index: 50; background: var(--bg); border-bottom: 1px solid var(--line); }
+.site-nav__inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 28px; }
+.site-nav__mark { font: 700 20px var(--display); letter-spacing: -.02em; color: var(--cyan); }
+.site-nav__mark span { color: var(--text); }
+.site-nav__links { display: flex; gap: 22px; margin-left: auto; align-items: center; list-style: none; font: 14px var(--ui); color: var(--text-2); }
+.site-nav__links a:hover { color: var(--text); }
+.site-nav__links a[aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+.site-nav__pillar { font-family: var(--mono); font-weight: 500; }
+.site-nav__right { display: flex; gap: 12px; align-items: center; }
+.site-nav__menu { display: none; background: none; border: 1px solid var(--line); color: var(--text); height: 38px; padding: 0 12px; border-radius: 4px; font: 500 13px var(--mono); cursor: pointer; }
+.site-nav__mobile { list-style: none; border-top: 1px solid var(--line); padding: 8px 18px 14px; background: var(--bg); }
+.site-nav__mobile a { display: flex; gap: 12px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); font: 500 15px var(--ui); color: var(--text); }
+.site-nav__mobile-sub { font: 12px var(--mono); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+/* theme pill */
+.theme-pill { position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; align-items: center; height: 34px; padding: 3px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--surface); cursor: pointer;
+  font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.theme-pill:hover { border-color: var(--muted); }
+.theme-pill__opt { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; padding: 0 10px; height: 100%; transition: color var(--t-md) var(--ease); }
+.theme-pill__opt svg { width: 13px; height: 13px; }
+.theme-pill__knob { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 999px; background: var(--text); transition: transform var(--t-md) var(--ease); }
+.theme-pill[data-active="light"] .theme-pill__knob { transform: translateX(100%); }
+.theme-pill[data-active="dark"] .theme-pill__opt[data-v="dark"],
+.theme-pill[data-active="light"] .theme-pill__opt[data-v="light"] { color: var(--bg); }
+
+/* gold = Noel's hand: author marks only */
+.gtag { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.grule { display: block; width: 28px; height: 1px; background: var(--gold-rule); }
+.sig { font-family: var(--sig); font-style: italic; font-weight: 400; font-size: 1.15em; letter-spacing: 0; color: var(--text); }
+
+/* footer */
+.site-footer { border-top: 1px solid var(--line); margin-top: 72px; }
+.site-footer__inner { max-width: 1200px; margin: 0 auto; padding: 28px 24px 32px; display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center; color: var(--muted); font: 13px var(--ui); }
+.site-footer__by { display: flex; gap: 14px; align-items: center; }
+.site-footer__by img { width: 44px; height: 44px; border-radius: 6px; display: block; }
+.site-footer .badge-light { display: none; }
+html:not(.dark) .site-footer .badge-dark { display: none; }
+html:not(.dark) .site-footer .badge-light { display: block; }
+.site-footer__sig { display: grid; gap: 5px; }
+.site-footer__sig .sig { font-size: 17px; }
+.site-footer__links a { text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 860px) {
+  .site-nav__links { display: none; }
+  .site-nav__menu { display: inline-block; }
+  .site-nav__right { margin-left: auto; }
+}
+@media (max-width: 640px) {
+  .site-nav__inner { padding: 0 18px; gap: 8px; }
+  .theme-pill__label { display: none; }
+  .theme-pill__opt { padding: 0 8px; justify-content: center; }
+  .theme-pill { height: 38px; }
+  .site-nav__sub { padding: 0 11px; }
+  .site-footer__inner { grid-template-columns: 1fr; padding: 24px 18px 28px; }
 }

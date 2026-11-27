@@ -42,11 +42,11 @@ function applyTheme(resolved: "light" | "dark") {
 }
 
 function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "system";
   const stored = localStorage.getItem("darqera-theme");
   return stored === "light" || stored === "dark" || stored === "system"
     ? stored
-    : "dark";
+    : "system";
 }
 
 const subscribeToHydration = () => () => {};

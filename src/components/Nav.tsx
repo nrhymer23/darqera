@@ -5,166 +5,74 @@ import { usePathname } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
 import { useState } from "react";
 
-const tabs = [
-  { label: "Home", href: "/" },
-  { label: "D", href: "/d", title: "Decentralized" },
-  { label: "A", href: "/a", title: "Artificial Intelligence" },
-  { label: "R", href: "/r", title: "Reality" },
-  { label: "Q", href: "/q", title: "Quantum" },
+const links = [
+  { label: "30 Days", href: "/#series" },
+  { label: "D", href: "/d", title: "Decentralization", color: "var(--d)", pillar: true },
+  { label: "A", href: "/a", title: "AI", color: "var(--a)", pillar: true },
+  { label: "R", href: "/r", title: "Reality", color: "var(--r)", pillar: true },
+  { label: "Q", href: "/q", title: "Quantum", color: "var(--q)", pillar: true },
   { label: "Archive", href: "/archive" },
   { label: "About", href: "/about" },
 ];
 
-const pillarColors: Record<string, string> = {
-  "/": "var(--brand-cyan)",
-  "/d": "var(--pillar-d)",
-  "/a": "var(--pillar-a)",
-  "/r": "var(--pillar-r)",
-  "/q": "var(--pillar-q)",
-};
-
 export default function Nav() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const isActive = (href: string) =>
+    !href.startsWith("/#") && href !== "/" && pathname.startsWith(href);
 
   return (
-    <header
-      className="sticky top-0 z-50 w-full"
-      style={{
-        background: "var(--bg-nav)",
-        backdropFilter: "blur(32px)",
-        WebkitBackdropFilter: "blur(32px)",
-        borderBottom: "1px solid var(--bg-nav-border)",
-        boxShadow: "var(--shadow-nav)",
-      }}
-    >
-      <nav className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="font-[family-name:var(--font-space-grotesk)] font-bold text-lg tracking-tight hover:opacity-80 transition-opacity"
-          style={{ color: "var(--brand-cyan)" }}
-        >
-          DARQ<span style={{ color: "var(--text-primary)" }}>ERA</span>
+    <header className="site-nav">
+      <nav className="site-nav__inner" aria-label="Main">
+        <Link href="/" className="site-nav__mark" aria-label="DARQ Era home">
+          DARQ<span>ERA</span>
         </Link>
 
-        {/* Desktop Tabs */}
-        <ul className="hidden sm:flex items-center gap-2">
-          {tabs.map((tab) => {
-            const isActive =
-              tab.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(tab.href);
-            const accent = pillarColors[tab.href] ?? "var(--text-primary)";
-
-            return (
-              <li key={tab.href}>
-                <Link
-                  href={tab.href}
-                  title={tab.title}
-                  className="nav-link relative px-4 py-1.5 text-sm font-medium tracking-wide transition-colors font-[family-name:var(--font-space-grotesk)]"
-                  style={isActive ? { color: accent } : undefined}
-                >
-                  {tab.label}
-                  {isActive && (
-                    <span
-                      className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
-                      style={{ backgroundColor: accent }}
-                    />
-                  )}
-                </Link>
-              </li>
-            );
-          })}
+        <ul className="site-nav__links">
+          {links.map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                title={l.title}
+                className={l.pillar ? "site-nav__pillar" : undefined}
+                aria-current={isActive(l.href) ? "page" : undefined}
+                style={l.color ? { color: l.color } : undefined}
+              >
+                {l.label}
+              </Link>
+            </li>
+          ))}
         </ul>
 
-        {/* Right side: theme toggle + mobile hamburger */}
-        <div className="flex items-center gap-3">
+        <div className="site-nav__right">
           <ThemeToggle />
-
-          {/* Mobile hamburger */}
+          <a href="#subscribe" className="btn-cyan site-nav__sub">
+            Subscribe
+          </a>
           <button
-            className="sm:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            type="button"
+            className="site-nav__menu"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
             id="mobile-menu-toggle"
           >
-            <span
-              className="block w-5 h-[2px] rounded-full transition-all"
-              style={{
-                backgroundColor: "var(--text-primary)",
-                transform: mobileOpen
-                  ? "rotate(45deg) translate(2px, 2px)"
-                  : "none",
-              }}
-            />
-            <span
-              className="block w-5 h-[2px] rounded-full transition-all"
-              style={{
-                backgroundColor: "var(--text-primary)",
-                opacity: mobileOpen ? 0 : 1,
-              }}
-            />
-            <span
-              className="block w-5 h-[2px] rounded-full transition-all"
-              style={{
-                backgroundColor: "var(--text-primary)",
-                transform: mobileOpen
-                  ? "rotate(-45deg) translate(2px, -2px)"
-                  : "none",
-              }}
-            />
+            {open ? "Close" : "Menu"}
           </button>
         </div>
       </nav>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div
-          className="sm:hidden mobile-menu-enter"
-          style={{
-            backgroundColor: "var(--bg-card)",
-            borderTop: "1px solid var(--border-ghost)",
-          }}
-        >
-          <ul className="flex flex-col px-6 py-3">
-            {tabs.map((tab) => {
-              const isActive =
-                tab.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(tab.href);
-              const accent = pillarColors[tab.href] ?? "var(--text-primary)";
-
-              return (
-                <li key={tab.href}>
-                  <Link
-                    href={tab.href}
-                    title={tab.title}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-3 text-sm font-medium tracking-wide font-[family-name:var(--font-space-grotesk)]"
-                    style={{
-                      color: isActive ? accent : "var(--text-muted)",
-                      borderLeft: isActive
-                        ? `2px solid ${accent}`
-                        : "2px solid transparent",
-                      paddingLeft: "12px",
-                    }}
-                  >
-                    {tab.label}
-                    {tab.title && (
-                      <span
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        {tab.title}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+      {open && (
+        <ul id="mobile-menu" className="site-nav__mobile mobile-menu-enter">
+          {links.map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} onClick={() => setOpen(false)}>
+                <span style={l.color ? { color: l.color } : undefined}>{l.label}</span>
+                {l.title && <span className="site-nav__mobile-sub">{l.title}</span>}
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </header>
   );
