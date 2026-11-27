@@ -5,11 +5,14 @@ import { useEffect, useState } from "react";
 interface ViewCounterProps {
   slug: string;
   initialCount?: number;
+  /** A2: count views silently (public view counts were dropped). */
+  hidden?: boolean;
 }
 
 export default function ViewCounter({
   slug,
   initialCount = 0,
+  hidden = false,
 }: ViewCounterProps) {
   const [count, setCount] = useState(initialCount);
 
@@ -42,7 +45,7 @@ export default function ViewCounter({
     trackView();
   }, [slug]);
 
-  if (count === 0) return null;
+  if (hidden || count === 0) return null;
 
   return (
     <span
