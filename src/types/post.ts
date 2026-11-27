@@ -16,6 +16,13 @@ export interface Post {
   /** Optional cover image URL; null falls back to generative pillar art. */
   cover_image?: string | null;
   cover_alt?: string | null;
+  /** A2: day number in the 30-day series (1–30); null for non-series posts. */
+  series_day?: number | null;
+  /** A2: series day, major-news analysis, or standalone feature. */
+  kind?: "series" | "news" | "feature" | null;
+  /** A2: post spans all four pillars (DARQ treatment); `pillar` stays its home pillar. */
+  cross_pillar?: boolean | null;
+  updated_at?: string | null;
 }
 
 export const PILLAR_META: Record<
@@ -24,26 +31,26 @@ export const PILLAR_META: Record<
 > = {
   D: {
     label: "D",
-    full: "Decentralized",
-    color: "#00e5c4",
+    full: "Decentralization",
+    color: "#3DD6A8",
     href: "/d",
   },
   A: {
     label: "A",
     full: "Artificial Intelligence",
-    color: "#39ff8c",
+    color: "#C4EE3A",
     href: "/a",
   },
   R: {
     label: "R",
     full: "Reality",
-    color: "#ff3d8a",
+    color: "#FF5C93",
     href: "/r",
   },
   Q: {
     label: "Q",
     full: "Quantum",
-    color: "#b366ff",
+    color: "#A98BFF",
     href: "/q",
   },
 };

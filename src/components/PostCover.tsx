@@ -1,19 +1,23 @@
 import Image from "next/image";
 import type { Post } from "@/types/post";
-import PillarCanvas from "@/components/PillarCanvas";
+import { coverSvg } from "@/lib/cover";
 
 interface PostCoverProps {
-  post: Pick<Post, "pillar" | "title" | "cover_image" | "cover_alt">;
+  post: Pick<Post, "slug" | "pillar" | "title" | "cover_image" | "cover_alt"> &
+    Partial<Pick<Post, "series_day" | "kind" | "cross_pillar">>;
   /** `sizes` hint for responsive loading. */
   sizes: string;
   priority?: boolean;
+  /** Hide the DARQERA wordmark (small thumbnails). */
+  label?: boolean;
 }
 
 /**
  * A post's cover: the uploaded image when there is one, otherwise the
- * generative art for its pillar. Fills its positioned parent.
+ * generated A2 type card for its pillar (same drawing as the OG image).
+ * Fills its positioned parent.
  */
-export default function PostCover({ post, sizes, priority = false }: PostCoverProps) {
+export default function PostCover({ post, sizes, priority = false, label = true }: PostCoverProps) {
   if (post.cover_image) {
     return (
       <Image
@@ -26,5 +30,11 @@ export default function PostCover({ post, sizes, priority = false }: PostCoverPr
       />
     );
   }
-  return <PillarCanvas pillar={post.pillar} />;
+  return (
+    <div
+      className="cover-art"
+      // coverSvg escapes all post text it embeds.
+      dangerouslySetInnerHTML={{ __html: coverSvg(post, { label }) }}
+    />
+  );
 }

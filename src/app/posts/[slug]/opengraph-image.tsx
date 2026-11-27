@@ -1,26 +1,13 @@
 import { ImageResponse } from "next/og";
 import { getPostBySlug } from "@/lib/posts";
-import { PILLAR_META } from "@/types/post";
+import { COVER_H, COVER_PILLARS, COVER_W, coverArtSvg, coverKicker, coverPillar } from "@/lib/cover";
 
-export const alt = "DARQ Era Post";
-export const size = {
-  width: 1200,
-  height: 630,
-};
+export const alt = "DARQ Era post";
+export const size = { width: COVER_W, height: COVER_H };
 export const contentType = "image/png";
 
-const PILLAR_COLORS: Record<string, string> = {
-  D: "#dbfcff",
-  A: "#a7ffb3",
-  R: "#fff3f9",
-  Q: "#00f0ff",
-};
-
-export default async function Image({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+/** Same drawing as the in-page cover (lib/cover): art as an SVG layer, type set by Satori. */
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
@@ -34,146 +21,82 @@ export default async function Image({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#131313",
-            color: "#e5e2e1",
-            fontSize: 48,
+            backgroundColor: "#121314",
+            color: "#E8E5DF",
+            fontSize: 64,
             fontWeight: 700,
           }}
         >
-          DARQ ERA
+          DARQ<span style={{ color: "#00E1EE" }}>ERA</span>
         </div>
       ),
-      { ...size }
+      size,
     );
   }
 
-  const pillarColor = PILLAR_COLORS[post.pillar] ?? "#00f0ff";
-  const pillarMeta = PILLAR_META[post.pillar];
+  const cp = coverPillar(post);
+  const color = COVER_PILLARS[cp].c;
+  const art = `data:image/svg+xml;base64,${Buffer.from(coverArtSvg(post)).toString("base64")}`;
+  const title = post.title.length > 90 ? `${post.title.slice(0, 87)}…` : post.title;
+  const fs = title.length > 48 ? 60 : 70;
 
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          backgroundColor: "#131313",
-          padding: "60px",
-          position: "relative",
-        }}
-      >
-        {/* Left accent bar */}
+      <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", backgroundColor: "#121314" }}>
+        {/* eslint-disable-next-line jsx-a11y/alt-text */}
+        <img src={art} width={COVER_W} height={COVER_H} style={{ position: "absolute", top: 0, left: 0 }} />
+        {cp !== "X" && (
+          <div
+            style={{
+              position: "absolute",
+              right: 30,
+              bottom: -150,
+              fontSize: 640,
+              fontWeight: 700,
+              lineHeight: 1,
+              color: "rgba(18,19,20,0.55)",
+              WebkitTextStroke: `3px ${color}`,
+            }}
+          >
+            {cp}
+          </div>
+        )}
         <div
           style={{
             position: "absolute",
-            left: 0,
             top: 0,
-            bottom: 0,
-            width: "6px",
-            backgroundColor: pillarColor,
-          }}
-        />
-
-        {/* Top: Pillar tag */}
-        <div
-          style={{
+            left: 0,
+            width: COVER_W,
+            height: COVER_H,
             display: "flex",
-            alignItems: "center",
-            marginBottom: "32px",
+            flexDirection: "column",
+            padding: "78px 72px 56px 72px",
           }}
         >
+          <div style={{ fontSize: 24, letterSpacing: 3, color, display: "flex" }}>{coverKicker(post)}</div>
           <div
             style={{
-              fontSize: 14,
+              marginTop: 40,
+              fontSize: fs,
               fontWeight: 600,
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              color: pillarColor,
-              backgroundColor: `${pillarColor}20`,
-              padding: "6px 14px",
-              borderRadius: "2px",
-            }}
-          >
-            {pillarMeta.full}
-          </div>
-        </div>
-
-        {/* Title */}
-        <div
-          style={{
-            display: "flex",
-            flex: 1,
-            alignItems: "flex-start",
-          }}
-        >
-          <div
-            style={{
-              fontSize: post.title.length > 80 ? 36 : post.title.length > 50 ? 44 : 52,
-              fontWeight: 700,
-              color: "#e5e2e1",
-              lineHeight: 1.15,
-              letterSpacing: "-0.02em",
-              maxWidth: "90%",
-              overflow: "hidden",
-            }}
-          >
-            {post.title}
-          </div>
-        </div>
-
-        {/* Bottom: Branding + date */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 14,
-              color: "#8a8a8a",
-              letterSpacing: "0.05em",
-            }}
-          >
-            {new Date(post.published_at).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </div>
-          <div
-            style={{
+              lineHeight: 1.08,
+              letterSpacing: -1.5,
+              color: "#E8E5DF",
+              maxWidth: 820,
               display: "flex",
-              alignItems: "baseline",
-              gap: "2px",
             }}
           >
-            <span
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "#00f0ff",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              DARQ
-            </span>
-            <span
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "#e5e2e1",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              ERA
-            </span>
+            {title}
+          </div>
+          <div style={{ marginTop: "auto", display: "flex", alignItems: "baseline", gap: 24 }}>
+            <div style={{ fontSize: 30, fontWeight: 700, color: "#00E1EE", display: "flex" }}>
+              DARQ<span style={{ color: "#E8E5DF" }}>ERA</span>
+            </div>
+            <div style={{ fontSize: 20, color: "#8E8B85", display: "flex" }}>darqera.com</div>
           </div>
         </div>
       </div>
     ),
-    { ...size }
+    size,
   );
 }

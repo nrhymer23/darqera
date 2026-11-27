@@ -67,3 +67,12 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
   if (error) throw error;
   return data as Post[];
 }
+
+/** Published posts in the 30-day series, ordered by day. Empty until the
+ *  series_day column exists and is filled (migration 0007). */
+export async function getSeriesPosts(): Promise<Post[]> {
+  const posts = await getPosts().catch(() => [] as Post[]);
+  return posts
+    .filter((p) => typeof p.series_day === "number")
+    .sort((a, b) => a.series_day! - b.series_day!);
+}
